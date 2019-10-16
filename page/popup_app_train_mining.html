@@ -1,0 +1,449 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+//更新状态
+function refreshStatus(table, appIndex, modelFlowIndexes, evaluates) {
+	while(true) {
+		var stdout = callback('algplat_get_python_stdout', 1);
+		if(typeof stdout != "string") {
+			break;
+		}
+		
+		var python_output = document.getElementById('python_output');
+		var text = python_output.value;
+		if (text.length > 10000) {
+			text = '';
+		}
+		text += stdout;
+		python_output.value = text;
+	}
+	
+	var app_type = callback('algplat_app_get_type', appIndex);
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+	for(var i = 0; i < paramComboCount; i++) {
+		var row = table.rows[1 + i];
+		var s = row.cells[1].innerHTML;
+		if(s == '待训练') {
+			if(document.getElementById("start_train_btn").value == '停中') {
+				document.getElementById("start_train_btn").value = '开始';
+				return;
+			}
+			
+			var err = callback('algplat_app_train_start_param_combo', i);
+			if(err != '') {
+				alert(err);
+				document.getElementById("start_train_btn").value = '开始';
+				return;
+			}
+			row.cells[1].innerHTML = '训练中';
+			setTimeout(function () { refreshStatus(table, appIndex, modelFlowIndexes, evaluates); }, 2000);
+			return;
+		}
+		
+		if(s == '训练中') {
+			var ret = callback('algplat_app_train_check_train_status', i);
+			if(ret == -1) {
+				row.cells[1].innerHTML = '训练失败';
+				alert('训练失败！');
+				document.getElementById("start_train_btn").value = '开始';
+				return;
+			}
+			if(ret == 0) {
+				setTimeout(function () { refreshStatus(table, appIndex, modelFlowIndexes, evaluates); }, 2000);
+				return;
+			}
+			
+			row.cells[1].innerHTML = callback('algplat_app_train_used_time', i);
+			for(var j = 0; j < evaluates.length; j++) {
+				if(app_type == 3) {
+					row.cells[4 + j].innerHTML = callback('algplat_app_train_evaluate_result', i, evaluates[j]);
+					continue;
+				}
+				
+				row.cells[4 + 2 * j].innerHTML = callback('algplat_app_train_evaluate_result', i, '训练集.' + evaluates[j]);
+				row.cells[4 + 2 * j + 1].innerHTML = callback('algplat_app_train_evaluate_result', i, '测试集.' + evaluates[j]);
+			}
+		}
+	}
+	
+    alert('训练结束！');
+	document.getElementById("start_train_btn").value = '开始';
+}
+
+function start_train(appIndex, modelFlowIndexes) {
+	var evaluates = callback('algplat_app_get_evaluates', appIndex, modelFlowIndexes).split(",");
+	var app_type = callback('algplat_app_get_type', appIndex);
+	var v = document.getElementById("start_train_btn").value;
+	if(v == '开始') {
+		callback('algplat_app_train_start');
+		
+		var paramComboCount = callback('algplat_app_train_param_combo_count');
+		var table = document.getElementById('list');
+		
+		for(var i = 0; i < paramComboCount; i++) {
+			var row = table.rows[i+1];
+			row.cells[1].innerHTML = '待训练';
+			
+			for(var j = 0; j < evaluates.length; j++) {
+				if(app_type == 3) {
+					row.cells[4 + j].innerHTML = '';
+					continue;
+				}
+				row.cells[4 + 2 * j].innerHTML = '';
+				row.cells[4 + 2 * j + 1].innerHTML = '';
+			}
+		}
+		
+		document.getElementById("start_train_btn").value = '停止';
+		setTimeout(function () { refreshStatus(table, appIndex, modelFlowIndexes, evaluates); }, 1);
+		
+	} else if(v == '停止') {
+		document.getElementById("start_train_btn").value = '停中';
+		
+	} else if(v == '停中') {
+		alert('正在停止中，请等候！');
+	}
+}
+
+function save_train_result(appIndex) {
+	var err = callback('algplat_app_train_save');
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	
+	crawler_active_ui_runjs(2, "refresh_train_model_info(" + appIndex + ");");
+	alert('保存完成！');
+}
+
+function view_train_program() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '训练程序', 'popup_view_train_program.html?index=' + selected[0], 1000, 800);
+}
+
+function view_tensor_shape() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	var appIndex = callback('algplat_app_train_get_app_index', selected[0]);
+	var modelFlowIndex = callback('algplat_app_train_get_modelFlowIndex', selected[0]);
+	crawler_popup_wnd_show(-1, '模型流程各个节点的shape', 'popup_app_model_flow_chart_view_shape.html?appIndex=' + appIndex + '&modelFlowIndex=' + modelFlowIndex + '&paramComboIndex=' + selected[0], 1300, 950);
+}
+
+function view_watch_var_values() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '查看训练过程中监视系数的值', 'popup_app_train_view_watch_var_values.html?paramComboIndex=' + selected[0], 1300, 950);
+}
+
+function view_input_super_param() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '输入超参', 'popup_app_model_input_param_values.html?index=' + selected[0], 1000, 800);
+}
+
+function view_super_param() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '模型超参', 'popup_app_model_super_param_values.html?index=' + selected[0], 1000, 800);
+}
+
+function view_study_param() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '模型系数', 'popup_app_model_study_param_values.html?index=' + selected[0], 1000, 800);
+}
+
+function view_train_plot() {
+	var selected = new Array();
+    var select_num = 0;
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+    for (i = 0; i < paramComboCount; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+		alert('请选择参数组合！');
+		return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数组合！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '训练结果的预测曲线', 'popup_view_train_plot.html?index=' + selected[0], 700, 600);
+}
+
+function init(appIndex, modelFlowIndexes) {
+	var paramComboCount = callback('algplat_app_train_param_combo_count');
+	var evaluates = callback('algplat_app_get_evaluates', appIndex, modelFlowIndexes).split(",");
+	var app_type = callback('algplat_app_get_type', appIndex);
+	
+	var table = document.getElementById('list');
+	
+	// 初始化表头
+	var row = table.rows[0];
+    var cell = row.insertCell(0);
+	cell.innerHTML = "序号";
+	cell.setAttribute('width', 100);
+	
+	cell = row.insertCell(1);
+	cell.innerHTML = "用时";
+	cell.setAttribute('width', 200);
+	
+	cell = row.insertCell(2);
+	cell.innerHTML = "模型流程";
+	cell.setAttribute('width', 200);
+	
+	cell = row.insertCell(3);
+	cell.innerHTML = "输入超参";
+	cell.setAttribute('width', 800);
+	
+	for(var i = 0; i < evaluates.length; i++) {
+		var e = evaluates[i]
+		var pos = e.lastIndexOf('.');
+		if(pos > 0) {
+			e = e.substring(pos + 1);
+		}
+		
+		if(app_type == 3) {
+			cell = row.insertCell(4 + i);
+			cell.innerHTML = e;
+			cell.setAttribute('width', 200);
+			continue;
+		}
+		
+		cell = row.insertCell(4 + 2 * i);
+		cell.innerHTML = '训练集.' + e;
+		cell.setAttribute('width', 200);
+		
+		cell = row.insertCell(4 + 2 * i + 1);
+		cell.innerHTML = '测试集.' + e;
+		cell.setAttribute('width', 200);
+	}
+	
+	// 初始化表体
+	for(var rowNo = 0; rowNo < paramComboCount; rowNo++) {
+		
+		var row = table.insertRow(rowNo + 1);
+		//row.setAttribute('bgcolor', '#CCCCCC');
+		
+		var cell = row.insertCell(0);
+		cell.innerHTML = '<input id="check_' + rowNo + '" type="checkbox"/>' + (rowNo+1);
+
+		cell = row.insertCell(1);
+		cell.innerHTML = '待训练';
+		
+		cell = row.insertCell(2);
+		cell.innerHTML = callback('algplat_app_train_get_model_flow_name', rowNo);
+		
+		cell = row.insertCell(3);
+		var v = callback('algplat_app_train_get_input_super_param', rowNo);
+		if(v.length > 200) {
+			v = v.substring(0, 200) + ' ...';
+		}
+		v = v.replace('<', '&lt;');
+		v = v.replace('>', '&gt;');
+		cell.innerHTML = v;
+		
+		for(var i = 0; i < evaluates.length; i++) {
+			if(app_type == 3) {
+				cell = row.insertCell(4 + i);
+				continue;
+			}
+			
+			cell = row.insertCell(4 + 2 * i);
+			cell = row.insertCell(4 + 2 * i + 1);
+		}
+    }
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = 0;
+	var modelFlowIndexes = '';
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'modelFlowIndexes') {
+                modelFlowIndexes = namevalue[1];
+            }
+        }
+    }
+	
+	var app_type = callback('algplat_app_get_type', index);
+	if(app_type == 0 || app_type == 2) {
+		document.getElementById("train_plot_btn").style.display = 'none';
+	}
+	
+	init(index, modelFlowIndexes);
+	
+	document.getElementById("start_train_btn").setAttribute('onclick', 'start_train(' + index + ',\'' + modelFlowIndexes + '\');');
+	document.getElementById("save_train_result_btn").setAttribute('onclick', 'save_train_result(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		<input type="button" value="开始" id="start_train_btn"/>
+		<input type="button" value="训练程序" title="查看训练程序" onclick="view_train_program();" style="margin-left:5px;width:90px;"/>
+		<input type="button" value="查看数据维度" title="查看模型流程各个节点的shape" onclick="view_tensor_shape();" style="width:120px;" />
+		<input type="button" value="查看监视系数" title="查看训练过程中监视系数的值" onclick="view_watch_var_values();" style="width:120px;" />
+		<input type="button" value="输入超参" title="查看输入超参" onclick="view_input_super_param();" style="margin-left:5px;width:90px;"/>
+		<input type="button" value="模型超参" title="查看全部超参" onclick="view_super_param();" style="margin-left:5px;width:90px;"/>
+		<input type="button" value="模型系数" title="查看模型系数" onclick="view_study_param();" style="margin-left:5px;width:90px;"/>
+		<input type="button" value="保存" title="保存训练结果" id="save_train_result_btn"/>
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_app_train_mining');" style="margin-left:5px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+			</tr>
+		</tbody></table>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<textarea id="python_output" style="width:100%;" rows="44"></textarea>
+	</div>
+	
+</body>
+</html>

@@ -1,0 +1,19 @@
+{"help_topology":{
+	"menu_width":250,
+	"menu_html":"help_menu.html",
+	"menus":
+	[
+		{
+			"name":"1 环境参数",
+			"url":"content_setting.html"
+		},
+		{
+			"name":"2 扫码规则",
+			"url":"content_scan_rule.html"
+		},
+		{
+			"name":"3 器件扫码",
+			"url":"content_scan.html"
+		}
+	]
+}}

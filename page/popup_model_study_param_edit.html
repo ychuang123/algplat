@@ -1,0 +1,100 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(modelIndex, paramIndex) {
+
+	var name = document.getElementById('name').value;
+	if(name == '') {
+		alert('请输入名称！');
+		return;
+	}
+	
+	var desc = document.getElementById('desc').value;
+	
+	var msg = callback('algplat_set_model_study_param', modelIndex, paramIndex, name, desc);
+	if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+	crawler_active_ui_runjs(2, "refresh();");
+	crawler_active_popup_runjs('popup_model_study_param_list', 'refresh(' + modelIndex + ');');
+	crawler_popup_wnd_hide('popup_model_study_param_edit');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var modelIndex = 0;
+	var paramIndex = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'modelIndex') {
+                modelIndex = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'paramIndex') {
+                paramIndex = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	if(paramIndex >= 0) {
+		var modleName = callback('algplat_model_get_class', modelIndex);
+		document.getElementById("name").value = callback('algplat_model_get_param_value', modleName, 0, paramIndex, 'name');
+        document.getElementById("desc").value = callback('algplat_model_get_param_value', modleName, 0, paramIndex, 'desc');
+		
+		document.getElementById("name").setAttribute('disabled', 'disabled');
+	}
+	
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + modelIndex + ',' + paramIndex + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+	
+	<div style="margin-top:15px;">
+		名称
+		<input id="name" type="text" style="margin-left:18px;width:680px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		描述
+		<input id="desc" type="text" style="margin-left:18px;width:680px;"/>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_model_study_param_edit');" style="margin-left:20px;"/>
+	</div>
+	
+</body>
+</html>

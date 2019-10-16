@@ -1,0 +1,186 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function refresh_ui(nodeIdArray) {
+	var table = document.getElementById('list');
+	var rowCount = 0;
+	for (var i = 0; i < nodeIdArray.length; i++) {
+		var nodeId = parseInt(nodeIdArray[i]);
+		var modelName = callback('algplat_app_set_super_param_model_name', nodeId);
+		var varName = callback('algplat_app_set_super_param_model_var', nodeId);
+		var paramCount = callback('algplat_model_get_param_count', modelName, 1);
+		
+		for(var j = 0; j < paramCount; j++) {
+			rowCount += 1;
+			var row = table.insertRow(rowCount);
+			var cell = row.insertCell(0);
+			cell.innerHTML = varName + '.' + callback('algplat_model_get_param_value', modelName, 1, j, 'name');
+			cell.title = modelName;
+			
+			var option = '';
+			if(callback('algplat_model_get_param_value', modelName, 1, j, 'option') == 0) {
+				option = '<font style="color:#F00;">*</font>';
+			}
+			
+			cell = row.insertCell(1);
+			cell.innerHTML = '<input id="input_' + i + '_' + j + '" type="text" style="width:300px;" title="单值，空格分隔，min:max:step，min:max:step:base，<obj ${obj_define}>，<function ${plugin_name}>，<class ${plugin_name}>"/>' + option + '</td>';
+			
+			cell = row.insertCell(2);
+			cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, j, 'valueSet');
+			
+			cell = row.insertCell(3);
+			cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, j, 'defaultValue');
+			
+			cell = row.insertCell(4);
+			cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, j, 'candidateValues');
+		}
+		rowCount += 1;
+		var row = table.insertRow(rowCount);
+		var cell = row.insertCell(0);
+		cell.innerHTML = varName + '.其他';
+		cell.title = modelName;
+		
+		cell = row.insertCell(1);
+		cell.innerHTML = '<textarea id="input_' + i + '_other" style="width:300px;" rows="10" title="参数名:参数值 分行"></textarea>';
+		
+		cell = row.insertCell(2);
+		cell = row.insertCell(3);
+		cell = row.insertCell(4);
+	}
+}
+
+function update_values(nodeIdArray) {
+	for (var i = 0; i < nodeIdArray.length; i++) {
+		var nodeId = parseInt(nodeIdArray[i]);
+		var modelName = callback('algplat_app_set_super_param_model_name', nodeId);
+		var varName = callback('algplat_app_set_super_param_model_var', nodeId);
+		var paramCount = callback('algplat_model_get_param_count', modelName, 1);
+		for(var j = 0; j < paramCount; j++) {
+			var paramName = callback('algplat_model_get_param_value', modelName, 1, j, 'name');
+			document.getElementById('input_' + i + '_' + j).value = callback('algplat_app_get_super_param_value_for_ui_set', modelName, varName, paramName);
+		}
+		document.getElementById('input_' + i + '_other').value = callback('algplat_app_get_super_param_value_for_ui_set', modelName, varName, '');
+	}
+}
+
+function commit(nodes) {
+	callback('algplat_app_add_super_param_space_append_before');
+	var nodeIdArray = nodes.split(",");
+	for (var i = 0; i < nodeIdArray.length; i++) {
+		var nodeId = parseInt(nodeIdArray[i]);
+		var modelName = callback('algplat_app_set_super_param_model_name', nodeId);
+		var varName = callback('algplat_app_set_super_param_model_var', nodeId);
+		var paramCount = callback('algplat_model_get_param_count', modelName, 1);
+		for(var j = 0; j < paramCount; j++) {
+			var paramName = callback('algplat_model_get_param_value', modelName, 1, j, 'name');
+			var paramValue = document.getElementById('input_' + i + '_' + j).value;
+			if(paramValue == '') {
+				if(callback('algplat_model_get_param_value', modelName, 1, j, 'option') == 0) {
+					alert('参数 [' + varName + '.' + paramName + '] 不能为空！');
+					return;
+				}
+				continue;
+			}
+			
+			var err = callback('algplat_app_add_super_param_space_append', nodeId, paramName, paramValue);
+			if(err != '') {
+				alert('参数 [' + varName + '.' + paramName + '] 添加失败：' + err);
+				return;
+			}
+		}
+		
+		var other = document.getElementById('input_' + i + '_other').value;
+		if(other != '') {
+			var lines = other.split('\n');
+			for (var i = 0; i < lines.length; i++) {
+				var line = lines[i];
+				var pos = line.indexOf(':');
+				if(pos <= 0 || pos == line.length - 1) {
+					alert(varName + ' 其他参数输入有误！');
+					return;
+				}
+				
+				var paramName = line.substring(0, pos);
+				var paramValue = line.substring(pos + 1);
+				var err = callback('algplat_app_add_super_param_space_append', nodeId, paramName, paramValue);
+				if(err != '') {
+					alert(varName + ' 其他参数添加失败：' + err);
+					return;
+				}
+			}
+		}
+	}
+	callback('algplat_app_add_super_param_space_append_after', nodes);
+	
+	crawler_active_popup_runjs('popup_app_model_flow_chart_input_param', 'update_values("' + nodes + '");');
+	crawler_active_popup_runjs('popup_app_model_flow_chart_input_param', 'on_cmd("unselect");');
+	crawler_popup_wnd_hide('popup_app_model_super_param_space_input');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+	var nodes = '';
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+			if (namevalue[0] == 'nodes') {
+                nodes = namevalue[1];
+            }
+        }
+    }
+	
+	var nodeIdArray = nodes.split(",");
+	refresh_ui(nodeIdArray);
+	update_values(nodeIdArray);
+	document.getElementById("id_ok").setAttribute('onclick', 'commit("' + nodes + '");');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+	<div>
+		<input type="button" value="确定" id="id_ok" />
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_model_super_param_space_input');"/>
+		<input type="button" value="查看插件" onclick="crawler_popup_wnd_show(-1, '插件列表', 'popup_plugin_select.html', 1000, 600);" style="margin-left:40px;width:90px;"/>
+	</div>
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+		<tr style="background-color:#cccccc">
+			<td width="100">参数名</td>
+			<td width="340">参数值</td>
+			<td width="400">值集</td>
+			<td width="100">默认值</td>
+			<td width="150">推荐集</td>
+		</tr>
+		</tbody></table>
+	</div>
+</body>
+</html>

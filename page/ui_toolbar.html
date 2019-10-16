@@ -1,0 +1,269 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 84px;
+	border: 1px;
+}
+</style>
+
+<script type="text/javascript">
+
+function updateToolBar(uimodel) {
+	document.getElementById('ui_app_classifier_list').style.display = 'none';
+	document.getElementById('ui_app_regressor_list').style.display = 'none';
+	document.getElementById('ui_app_cluster_list').style.display = 'none';
+	document.getElementById('ui_app_mining_list').style.display = 'none';
+	document.getElementById('ui_app_timeseries_list').style.display = 'none';
+	document.getElementById('ui_entity_list').style.display = 'none';
+	document.getElementById('ui_python_shell').style.display = 'none';
+	document.getElementById('ui_model_list').style.display = 'none';
+	document.getElementById('ui_evaluate_list').style.display = 'none';
+	document.getElementById('ui_plugin_list').style.display = 'none';
+	
+	document.getElementById(uimodel).style.display = '';
+}
+
+function enter_uimodel(uimodel)
+{
+	var err = crawler_enter_ui_model(uimodel);
+	if(err != '') {
+		alert(err);
+	}
+}
+
+function load()
+{
+	updateToolBar('ui_model_list');
+}
+
+function open_help_file() {
+	var err = crawler_help_wnd_show();
+	if(err != '') {
+		alert(err);
+	}
+}
+
+</script>
+</head>
+<body onLoad="load();" bgcolor="#666" style="margin-top:6px;margin-left:6px;margin-right:8px;">
+<div id="ui_app_classifier_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加应用" title="增加模型应用" onclick="crawler_popup_wnd_show(-1, '增加应用', 'popup_add_app.html?type=0', 830, 600);" style="width:90px;" />
+		<input type="button" value="修改应用" title="修改模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_app\');');" style="width:90px;" />
+		<input type="button" value="删除应用" title="删除选择的模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_app\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="数据探索" title="探索训练集数据特点" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_explore_data\');');" style="width:90px;" />
+		<input type="button" value="模型流程" title="进入模型流程列表" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_set_model\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="模型预测" title="使用采用模型预测数据" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_predict\');');" style="width:90px;" />
+	</span>
+	<!--
+	<span style="margin-left:10px;">
+		<input type="button" value="训练程序" title="查看采用模型的训练程序" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_view_train_program\');');" style="width:90px;" />
+		<input type="button" value="输入超参" title="查看采用模型的输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_input_param\');');" style="width:90px;" />
+		<input type="button" value="最优超参" title="查看采用模型的最优输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_best_input_param\');');" style="width:90px;" />
+		<input type="button" value="模型超参" title="查看采用模型的全部超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_super_param\');');" style="width:90px;" />
+		<input type="button" value="模型系数" title="查看采用模型的模型系数" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_study_param\');');" style="width:90px;" />
+		<input type="button" value="评估结果" title="查看采用模型的评估结果" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_evaluate_result\');');" style="width:90px;" />
+		<input type="button" value="预测曲线" title="查看采用模型训练结果的预测曲线" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_train_plot\');');" style="width:90px;" />
+	</span>
+	-->
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_app_regressor_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加应用" title="增加模型应用" onclick="crawler_popup_wnd_show(-1, '增加应用', 'popup_add_app.html?type=1', 830, 600);" style="width:90px;" />
+		<input type="button" value="修改应用" title="修改模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_app\');');" style="width:90px;" />
+		<input type="button" value="删除应用" title="删除选择的模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_app\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="数据探索" title="探索训练集数据特点" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_explore_data\');');" style="width:90px;" />
+		<input type="button" value="模型流程" title="进入模型流程列表" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_set_model\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="模型预测" title="使用采用模型预测数据" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_predict\');');" style="width:90px;" />
+	</span>
+	<!--
+	<span style="margin-left:10px;">
+		<input type="button" value="训练程序" title="查看采用模型的训练程序" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_view_train_program\');');" style="width:90px;" />
+		<input type="button" value="输入超参" title="查看采用模型的输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_input_param\');');" style="width:90px;" />
+		<input type="button" value="最优超参" title="查看采用模型的最优输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_best_input_param\');');" style="width:90px;" />
+		<input type="button" value="模型超参" title="查看采用模型的全部超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_super_param\');');" style="width:90px;" />
+		<input type="button" value="模型系数" title="查看采用模型的模型系数" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_study_param\');');" style="width:90px;" />
+		<input type="button" value="评估结果" title="查看采用模型的评估结果" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_evaluate_result\');');" style="width:90px;" />
+		<input type="button" value="预测曲线" title="查看采用模型训练结果的预测曲线" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_train_plot\');');" style="width:90px;" />
+	</span>
+	-->
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_app_cluster_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加应用" title="增加模型应用" onclick="crawler_popup_wnd_show(-1, '增加应用', 'popup_add_app.html?type=2', 830, 600);" style="width:90px;" />
+		<input type="button" value="修改应用" title="修改模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_app\');');" style="width:90px;" />
+		<input type="button" value="删除应用" title="删除选择的模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_app\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="数据探索" title="探索训练集数据特点" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_explore_data\');');" style="width:90px;" />
+		<input type="button" value="模型流程" title="进入模型流程列表" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_set_model\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="模型预测" title="使用采用模型预测数据" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_predict\');');" style="width:90px;" />
+	</span>
+	<!--
+	<span style="margin-left:10px;">
+		<input type="button" value="训练程序" title="查看采用模型的训练程序" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_view_train_program\');');" style="width:90px;" />
+		<input type="button" value="输入超参" title="查看采用模型的输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_input_param\');');" style="width:90px;" />
+		<input type="button" value="最优超参" title="查看采用模型的最优输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_best_input_param\');');" style="width:90px;" />
+		<input type="button" value="模型超参" title="查看采用模型的全部超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_super_param\');');" style="width:90px;" />
+		<input type="button" value="模型系数" title="查看采用模型的模型系数" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_study_param\');');" style="width:90px;" />
+		<input type="button" value="评估结果" title="查看采用模型的评估结果" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_evaluate_result\');');" style="width:90px;" />
+		<input type="button" value="预测曲线" title="查看采用模型训练结果的预测曲线" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_train_plot\');');" style="width:90px;" />
+	</span>
+	-->
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_app_timeseries_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加应用" title="增加模型应用" onclick="crawler_popup_wnd_show(-1, '增加应用', 'popup_add_app_timeseries.html', 830, 570);" style="width:90px;" />
+		<input type="button" value="修改应用" title="修改模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_app\');');" style="width:90px;" />
+		<input type="button" value="删除应用" title="删除选择的模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_app\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="数据探索" title="探索训练集数据特点" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_explore_data\');');" style="width:90px;" />
+		<input type="button" value="模型流程" title="进入模型流程列表" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_set_model\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="模型预测" title="使用采用模型预测数据" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_predict\');');" style="width:90px;" />
+	</span>
+	<!--
+	<span style="margin-left:10px;">
+		<input type="button" value="训练程序" title="查看采用模型的训练程序" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_view_train_program\');');" style="width:90px;" />
+		<input type="button" value="输入超参" title="查看采用模型的输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_input_param\');');" style="width:90px;" />
+		<input type="button" value="最优超参" title="查看采用模型的最优输入超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_best_input_param\');');" style="width:90px;" />
+		<input type="button" value="模型超参" title="查看采用模型的全部超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_super_param\');');" style="width:90px;" />
+		<input type="button" value="模型系数" title="查看采用模型的模型系数" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_study_param\');');" style="width:90px;" />
+		<input type="button" value="评估结果" title="查看采用模型的评估结果" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_evaluate_result\');');" style="width:90px;" />
+		<input type="button" value="预测曲线" title="查看采用模型训练结果的预测曲线" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_train_plot\');');" style="width:90px;" />
+	</span>
+	-->
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_app_mining_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加应用" title="增加模型应用" onclick="crawler_popup_wnd_show(-1, '增加应用', 'popup_add_app_mining.html', 830, 540);" style="width:90px;" />
+		<input type="button" value="修改应用" title="修改模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_app\');');" style="width:90px;" />
+		<input type="button" value="删除应用" title="删除选择的模型应用" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_app\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="数据探索" title="探索训练集数据特点" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_explore_data\');');" style="width:90px;" />
+		<input type="button" value="模型流程" title="进入模型流程列表" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_set_model\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_entity_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加类型" title="增加实体类型" onclick="crawler_popup_wnd_show(-1, '增加实体类型', 'popup_add_entity.html', 800, 440);" style="width:90px;" />
+		<input type="button" value="修改类型" title="修改实体类型" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_entity\');');" style="width:90px;" />
+		<input type="button" value="删除类型" title="删除选择的实体类型" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_entity\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_python_shell" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="运行python程序" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_start_run\');');" style="width:140px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="数据筛选" title="提取满足指定条件的数据子集" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_select_subset\');');" style="width:90px;" />
+		<input type="button" value="数据合并" title="多行记录合并成一行记录" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_merge_row\');');" style="width:90px;" />
+		<input type="button" value="数据拆分" title="一行记录拆分成多行记录" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_split_row\');');" style="width:90px;" />
+		<input type="button" value="数据标注" title="标注样本数据" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_label_data\');');" style="width:90px;" />
+	</span>
+</div>
+<div id="ui_model_list" style="display:none">
+	<span>
+		<span style="FONT-FAMILY:宋体;font-size:18px;color:white;">类型</span>
+		<select id="ui_model_type_select" style="width:100px;" onchange="callback('algplat_model_set_list_type', this.value); crawler_active_ui_runjs(2, 'refresh();');">>
+			<option value="model_list_all">--全部--</option>
+			<option value="model_list_classifier">分类</option>
+			<option value="model_list_regressor">回归</option>
+			<option value="model_list_cluster">聚类</option>
+			<option value="model_list_timeseries">时间序列</option>
+			<option value="model_list_mining">模式挖掘</option>
+			<option value="model_list_preprocess">预处理</option>
+			<option value="model_list_featureSelect">特征选择</option>
+		</select>
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="增加模型" title="增加已有模型" onclick="crawler_popup_wnd_show(-1, '增加已有模型', 'popup_add_model.html', 800, 460);" style="width:90px;" />
+		<input type="button" value="增加自定义模型" title="增加自定义模型" onclick="crawler_popup_wnd_show(-1, '增加自定义模型', 'popup_add_define_model.html', 800, 920);" style="width:140px;" />
+		<input type="button" value="修改模型" title="修改模型信息" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_edit\');');" style="width:90px;" />
+		<input type="button" value="拷贝模型" title="拷贝模型信息" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_copy\');');" style="width:90px;" />
+		<input type="button" value="模型超参" title="定义模型超参" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_input_param\');');" style="width:90px;" />
+		<input type="button" value="模型系统" title="定义模型系数" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_study_param\');');" style="width:90px;" />
+		<input type="button" value="使用例子" title="模型使用例子" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_use_example\');');" style="width:90px;" />
+		<input type="button" value="删除模型" title="删除选择的模型" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_model\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+<div id="ui_evaluate_list" style="display:none">
+	<span>
+		<span style="FONT-FAMILY:宋体;font-size:18px;color:white;">类型</span>
+		<select id="ui_model_type_select" style="width:100px;" onchange="callback('algplat_evaluate_set_list_type', this.value); crawler_active_ui_runjs(2, 'refresh();');">>
+			<option value="evaluate_list_all">--全部--</option>
+			<option value="evaluate_list_classifier">分类</option>
+			<option value="evaluate_list_regressor">回归</option>
+			<option value="evaluate_list_cluster">聚类</option>
+		</select>
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="增加指标" title="增加已有评估指标" onclick="crawler_popup_wnd_show(-1, '增加已有评估指标', 'popup_add_evaluate.html', 800, 460);" style="width:90px;" />
+		<input type="button" value="增加自定义指标" title="增加自定义评估指标" onclick="crawler_popup_wnd_show(-1, '增加自定义评估指标', 'popup_add_define_evaluate.html', 800, 920);" style="width:140px;" />
+		<input type="button" value="修改指标" title="修改评估指标" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_evaluate\');');" style="width:90px;" />
+		<input type="button" value="使用例子" title="评估指标使用例子" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_use_example\');');" style="width:90px;" />
+		<input type="button" value="删除指标" title="删除评估指标" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_evaluate\');');" style="width:90px;" />
+	</span>
+</div>
+<div id="ui_plugin_list" style="display:none">
+	<span style="margin-left:10px;">
+		<input type="button" value="增加插件" title="增加已有的python函数或类" onclick="crawler_popup_wnd_show(-1, '增加已有的python函数或类', 'popup_add_plugin.html', 800, 440);" style="width:90px;" />
+		<input type="button" value="增加自定义插件" title="增加自定义的python函数或类" onclick="crawler_popup_wnd_show(-1, '增加自定义的python函数或类', 'popup_add_define_plugin.html', 800, 880);" style="width:140px;" />
+		<input type="button" value="修改插件" title="修改python插件函数或类" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_mod_plugin\');');" style="width:90px;" />
+		<input type="button" value="删除插件" title="删除选择的python插件函数或类" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'cmd_del_plugin\');');" style="width:90px;" />
+	</span>
+	<span style="margin-left:10px;">
+		<input type="button" value="选择全部" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'select_all\');');" />
+		<input type="button" value="取消选择" onclick="crawler_active_ui_runjs(2, 'on_cmd(\'unselect\');');" />
+	</span>
+</div>
+</body>
+</html>

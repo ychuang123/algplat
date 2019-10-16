@@ -1,0 +1,238 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index) {
+
+	var rowNum = callback('algplat_label_data_row_num');
+	for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+		if(document.getElementById('label_' + rowIndex).value == '') {
+			alert('请完成标注！');
+			return;
+		}
+	}
+	
+	for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+		var v = document.getElementById('label_' + rowIndex).value;
+		callback('algplat_label_data_set_label', v);
+	}
+	
+	if(callback('algplat_label_data_next_page') == 1) {
+		show_data_row(index);
+		return;
+	}
+	
+    callback('algplat_label_data_complete');
+	crawler_active_popup_runjs('popup_tool_label_data', 'refresh_list();');
+	alert('标注完成！');
+    crawler_popup_wnd_hide('popup_label_data');
+}
+
+function exit() {
+	if (crawl_prompt_yes_or_no('要提交当前页的标注结果吗？') != 0) {
+		var rowNum = callback('algplat_label_data_row_num');
+		for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+			if(document.getElementById('label_' + rowIndex).value == '') {
+				alert('请完成标注！');
+				return;
+			}
+		}
+		
+		for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+			var v = document.getElementById('label_' + rowIndex).value;
+			callback('algplat_label_data_set_label', v);
+		}
+	}
+	
+	callback('algplat_label_data_complete');
+	crawler_active_popup_runjs('popup_tool_label_data', 'refresh_list();');
+    crawler_popup_wnd_hide('popup_label_data');
+}
+
+function show_data_row(data_index) {
+	var table = document.getElementById('list');
+	var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+	var label_fields = callback('algplat_data_get_label_fields', data_index);
+	var text_fields = label_fields.split(",");
+	var entity_index = callback('algplat_data_get_label_entity_index', data_index);
+	var fieldNum = callback('algplat_data_field_num', data_index);
+	var rowNum = callback('algplat_label_data_row_num');
+	var start = callback('algplat_label_data_start');
+	for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+	
+		var row = table.insertRow(rowIndex + 1);
+		
+		var cell = row.insertCell(0);
+		cell.innerHTML = (start + rowIndex + 1);
+		
+		if(label_fields == '') {
+			for(var fieldIndex = 0; fieldIndex < fieldNum; fieldIndex++) {
+				cell = row.insertCell(fieldIndex + 1);
+				cell.innerHTML = callback('algplat_label_data_value', rowIndex, fieldIndex);
+			}
+		} else {
+			for(var fieldIndex = 0; fieldIndex < text_fields.length; fieldIndex++) {
+				var field = parseInt(text_fields[fieldIndex]) - 1;
+				cell = row.insertCell(fieldIndex + 1);
+				cell.innerHTML = callback('algplat_label_data_value', rowIndex, fieldIndex);
+			}
+		}
+		
+		// 标注字段
+		if(label_fields == '') {
+			cell = row.insertCell(fieldNum + 1);
+		} else {
+			cell = row.insertCell(text_fields.length + 1);
+		}
+		
+		if(entity_index < 0) {
+			cell.innerHTML = '<input id="label_' + rowIndex + '" type="text" style="width:150px;" />';
+		} else {
+			cell.innerHTML = '<select id="label_' + rowIndex + '" style="width:150px;" />';
+		}
+    }
+	
+	// select option
+	if(entity_index >= 0) {
+		var entities = callback('algplat_entity_get_entities', entity_index).split(",");
+		for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+			var ops = document.getElementById('label_' + rowIndex).options;
+			for (var i = 0; i < entities.length; i++) {
+				ops.add(new Option(entities[i], entities[i]));
+			}
+		}
+	}
+	
+	// 设置上次的标注
+	for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+		var label = callback('algplat_label_data_get_label', rowIndex);
+		if(label != '') {
+			document.getElementById('label_' + rowIndex).value = label;
+		}
+	}
+}
+
+function init_table(index, label_from_first, num_per_page) {
+	callback('algplat_label_data_init', index, label_from_first, num_per_page);
+	
+	var table = document.getElementById('list');
+	var label_fields = callback('algplat_data_get_label_fields', index);
+	var text_fields = label_fields.split(",");
+	
+	// 初始化表头
+	var row = table.rows[0];
+    var cell = row.insertCell(0);
+	cell.innerHTML = "序号";
+	cell.setAttribute('width', 100);
+	
+	if(label_fields == '') {
+		var fieldNum = callback('algplat_data_field_num', index);
+		for(var i = 0; i < fieldNum; i++) {
+			var fieldName = callback('algplat_data_field_name', index, i);
+			if(fieldName == '') {
+				fieldName = '字段' + (i+1);
+			}
+			
+			cell = row.insertCell(i + 1);
+			cell.innerHTML = fieldName;
+			cell.setAttribute('width', 200);
+		}
+		
+		cell = row.insertCell(fieldNum + 1);
+		cell.innerHTML = '标注';
+		cell.setAttribute('width', 200);
+		
+	} else {
+		for(var i = 0; i < text_fields.length; i++) {
+			var field = parseInt(text_fields[i]) - 1;
+			var fieldName = callback('algplat_data_field_name', index, field);
+			if(fieldName == '') {
+				fieldName = '字段' + (field+1);
+			}
+			
+			cell = row.insertCell(i + 1);
+			cell.innerHTML = fieldName;
+			cell.setAttribute('width', 200);
+		}
+		
+		cell = row.insertCell(text_fields.length + 1);
+		cell.innerHTML = '标注';
+		cell.setAttribute('width', 200);
+	}
+	
+	show_data_row(index);
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	var label_from_first = 0;
+	var num_per_page = 1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'label_from_first') {
+                label_from_first = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'num_per_page') {
+                num_per_page = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	init_table(index, label_from_first, num_per_page);
+    document.getElementById("id_next_page").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+			</tr>
+		</tbody></table>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="下一页" id="id_next_page" style="width:70px;"/>
+		<input type="button" value="退出" onclick="exit();" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

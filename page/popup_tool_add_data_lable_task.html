@@ -1,0 +1,164 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit() {
+	var target_type = '';
+	if(document.getElementById('label_target_num').checked) {
+		target_type = '数值';
+	} else if(document.getElementById('label_target_category').checked) {
+		target_type = '类别';
+	} else if(document.getElementById('label_text_entity').checked) {
+		target_type = '文本实体';
+	} else if(document.getElementById('label_image').checked) {
+		target_type = '图像';
+	}
+	
+	if(target_type == '') {
+		alert('请输入目标类型！');
+		return;
+	}
+	
+	var path = document.getElementById('path').value;
+	if(path == '') {
+		alert('请输入文件路径！');
+		return;
+	}
+	
+	var charset = '';
+	if(document.getElementById('charset_ansi').checked) {
+		charset = 'ansi';
+	} else if(document.getElementById('charset_utf_8').checked) {
+		charset = 'utf-8';
+	}
+	
+	var delimiter = document.getElementById('delimiter').value;
+	if(delimiter == '') {
+		alert('请输入字段分隔符！');
+		return;
+	}
+	
+	var firstLineTitle = 0;
+	if (document.getElementById('firstLineTitle').checked) {
+		firstLineTitle = 1;
+	}
+	
+	var label_fields = document.getElementById('label_fields').value;
+	if((target_type == '文本实体' || target_type == '图像') && label_fields == '') {
+		alert('请输入标注字段！');
+	}
+	
+	var entity_select = parseInt(document.getElementById('entity_select').value);
+	var label_entity = '';
+	if(entity_select >= 0) {
+		label_entity = callback('algplat_entity_get_name', entity_select);
+	}
+	
+	if((target_type == '类别' || target_type == '文本实体') && label_entity == '') {
+		alert('请选择标注实体！');
+		return;
+	}
+	
+    var msg = callback('algplat_add_data_label_task', firstLineTitle, target_type, path, charset, delimiter, label_fields, label_entity);
+	if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+	crawler_active_popup_runjs('popup_tool_label_data', "refresh_list();");
+    crawler_popup_wnd_hide('popup_tool_add_data_lable_task');
+}
+
+function selectFile() {
+    file_path = crawler_get_select_file(1, 'txt', '文本文件');
+    if (file_path != '') {
+        document.getElementById("path").value = file_path;
+    }
+}
+
+function loadEntity() {
+	var ops = document.getElementById('entity_select').options;
+	ops.length = 0;
+	ops.add(new Option('--请选择--', -1));
+	
+	var count = callback('algplat_entity_get_count');
+    for (i = 0; i < count; i++) {
+		var name = callback('algplat_entity_get_name', i);
+        ops.add(new Option(name, i));
+	}
+}
+
+function load() {
+	loadEntity();
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:10px;">
+		目标类型
+		<input type="radio" name="label_type" id="label_target_num" style="margin-left:10px;" checked />数值
+		<input type="radio" name="label_type" id="label_target_category" style="margin-left:30px;" />类别
+		<input type="radio" name="label_type" id="label_text_entity" style="margin-left:30px;" />文本实体
+		<input type="radio" name="label_type" id="label_image" style="margin-left:30px;" />图像
+	</div>
+	
+	<div style="margin-top:10px;">
+		文件路径
+		<input id="path" type="text" style="margin-left:10px;width:600px;"/>
+		<input type="button" value="选择" onclick="selectFile();"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		文件编码
+		<input type="radio" name="charset" id="charset_ansi" style="margin-left:10px;" checked/>ansi
+		<input type="radio" name="charset" id="charset_utf_8" style="margin-left:40px;"/>utf-8
+	</div>
+	
+	<div style="margin-top:10px;">
+		字段分隔
+		<input id="delimiter" type="text" style="margin-left:10px;width:600px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		首行标题
+		<input id="firstLineTitle" type="checkbox" style="margin-left:10px;" />
+	</div>
+	
+	<div style="margin-top:10px;">
+		标注字段
+		<input id="label_fields" type="text" style="margin-left:10px;width:600px;" title="文本实体和图像需要指定字段。可以多个，逗号分隔。字段编号从1开始。数值和类别也可以指定，标注时只显示这些字段" />
+	</div>
+	
+	<div style="margin-top:10px;">
+		标注实体
+		<select id="entity_select" style="margin-left:10px;" title="类别和文本实体需要选择" >
+		</select>
+	</div>
+	
+    <div style="margin-top:15px;">
+		<input type="button" value="确定" onclick="commit();"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_tool_add_data_lable_task');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

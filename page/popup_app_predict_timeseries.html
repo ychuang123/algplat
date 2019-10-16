@@ -1,0 +1,149 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+//更新状态
+function refreshStatus(appIndex) {
+	while(true) {
+		var stdout = callback('algplat_get_python_stdout');
+		if(typeof stdout != "string") {
+			break;
+		}
+		
+		var python_output = document.getElementById('python_output');
+		var text = python_output.value;
+		if (text.length > 10000) {
+			text = '';
+		}
+		text += stdout;
+		python_output.value = text;
+	}
+	
+    setTimeout(function () { refreshStatus(appIndex); }, 2000);
+}
+
+function start(appIndex) {
+	var data_in_file = document.getElementById("data_in_file").value;
+	if(data_in_file == '') {
+		alert('请输入数据输入文件！');
+		return;
+	}
+	
+	var trainSetShuffle = 0;
+	if(document.getElementById('trainSetShuffle').checked) {
+		trainSetShuffle = 1;
+	}
+	
+	var predict_len = document.getElementById("predict_len").value;
+	if(predict_len == '') {
+		alert('请输入预测数据长度！');
+		return;
+	}
+	
+	var predict_out_file = document.getElementById("predict_out_file").value;
+	if(predict_out_file == '') {
+		alert('请输入数据输入文件！');
+		return;
+	}
+	
+	var err = callback('algplat_app_predict_timeseries_start', appIndex, trainSetShuffle, parseInt(predict_len), data_in_file, predict_out_file);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	
+	alert('启动成功！');
+	return;
+}
+
+function select_data_in_file() {
+    file_path = crawler_get_select_file(1, 'txt', '文本文件');
+    if (file_path != '') {
+        document.getElementById("data_in_file").value = file_path;
+    }
+}
+
+function select_predict_out_file() {
+    file_path = crawler_get_select_file(1, 'txt', '文本文件');
+    if (file_path != '') {
+        document.getElementById("predict_out_file").value = file_path;
+    }
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = 0;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	callback('algplat_app_predict_clear_predict_program');
+	document.getElementById("start_btn").setAttribute('onclick', 'start(' + index + ');');
+	
+	setTimeout(function () { refreshStatus(index); }, 2000);
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		数据输入文件
+		<input id="data_in_file" type="text" style="width:750px;"/>
+		<input type="button" value="选择" onclick="select_data_in_file();"/>
+	</div>
+	<div style="margin-top:10px;">
+		数据输入随机
+		<input id="trainSetShuffle" type="checkbox" title="训练前是否对数据输入训练集随机排序" />
+	</div>
+	<div style="margin-top:10px;">
+		预测数据长度
+		<input id="predict_len" type="text" style="width:750px;"/>
+	</div>
+	<div style="margin-top:10px;">
+		预测输出文件
+		<input id="predict_out_file" type="text" style="width:750px;"/>
+		<input type="button" value="选择" onclick="select_predict_out_file();"/>
+	</div>
+	<div style="margin-top:10px;">
+		<input type="button" value="开始预测" id="start_btn" style="width:90px;"/>
+		<input type="button" value="预测程序" onclick="crawler_popup_wnd_show(-1, '预测程序', 'popup_view_predict_program.html', 1000, 800);" style="width:90px;"/>
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_app_predict_timeseries');" style="margin-left:10px;"/>
+	</div>
+	<div style="margin-top:10px;">
+		<textarea id="python_output" style="width:100%;" rows="38"></textarea>
+	</div>
+	
+</body>
+</html>

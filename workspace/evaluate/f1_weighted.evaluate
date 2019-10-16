@@ -1,0 +1,1 @@
+{"evaluate":{"opTime":1564927974,"classifier":1,"regressor":0,"cluster":0,"greaterBetter":1,"pythonFun":"f1_weighted","pythonFunImport":"from sklearn.metrics import f1_score","pythonFunDefine":"def f1_weighted(y_true, y_pred):\n    return f1_score(y_true, y_pred, average='weighted')","desc":"加权平均","useExample":""}}

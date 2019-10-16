@@ -1,0 +1,92 @@
+﻿<html>
+<head>
+<style type="text/css">
+a
+{
+	font-family: "宋体";
+	font-size: 18px;
+}
+[my_attr_menu_unselect]
+{
+    color: #000000;
+}
+[my_attr_menu_selected]
+{
+	color: blue;
+}
+</style>
+
+<script type="text/javascript">
+
+function update(sel_index) {
+    var help_item_count = crawler_get_help_item_count();
+    for (var i = 0; i < help_item_count; i++) {
+        if (i == sel_index) {
+            document.getElementById(i).removeAttribute("my_attr_menu_unselect");
+            document.getElementById(i).setAttribute("my_attr_menu_selected", "on");
+        } else {
+            document.getElementById(i).removeAttribute("my_attr_menu_selected");
+            document.getElementById(i).setAttribute("my_attr_menu_unselect", "on");
+        }
+    }
+}
+
+function goto_help_item(sel_index) {
+	crawler_show_help_item(sel_index);
+	update(sel_index);
+}
+
+function collect_item(sel_index) {
+	var last_child = crawler_get_help_last_child(sel_index);
+	for(var i = sel_index + 1; i <= last_child; i++) {
+		document.getElementById('div_' + i).style.display = 'none';
+	}
+	
+	document.getElementById('collect_' + sel_index).style.display = 'none';
+	document.getElementById('uncollect_' + sel_index).style.display = '';
+}
+
+function uncollect_item(sel_index) {
+	var last_child = crawler_get_help_last_child(sel_index);
+	for(var i = sel_index + 1; i <= last_child; i++) {
+		if(crawler_get_help_last_child(i) > i) {
+			document.getElementById('collect_' + i).style.display = '';
+			document.getElementById('uncollect_' + i).style.display = 'none';
+		}
+		
+		document.getElementById('div_' + i).style.display = '';
+	}
+	
+	document.getElementById('collect_' + sel_index).style.display = '';
+	document.getElementById('uncollect_' + sel_index).style.display = 'none';
+}
+
+function load() {
+	var html = '';
+    var help_item_count = crawler_get_help_item_count();
+    for (var i = 0; i < help_item_count; i++) {
+        html += '<div id="div_' + i + '"';
+        html += ' style="margin-top:8px;margin-left:4px;">';
+        html += '<a id="' + i + '"';
+        html += ' onclick="goto_help_item(' + i + ');">' + crawler_get_help_name(i) + '</a>';
+		
+		var last_child = crawler_get_help_last_child(i);
+		if(last_child > i) {
+			html += ' <a id="collect_' + i + '" onclick="collect_item(' + i + ');"><font style="color:#F0F;font-family:宋体;font-size:12px;">收起</font></a>';
+			html += ' <a id="uncollect_' + i + '" onclick="uncollect_item(' + i + ');" style="display:none"><font style="color:#F0F;font-family:宋体;font-size:12px;">展开</font></a>';
+		}
+		
+        html += '</div>';
+    }
+    document.getElementById("b").innerHTML = html;
+	goto_help_item(0);
+}
+
+</script>
+
+</head>
+<body onLoad="load();" bgcolor="#EEE" style="margin-top:6px;margin-left:6px;margin-right:8px;">
+<div id="b">
+</div>
+</body>
+</html>

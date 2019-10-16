@@ -1,0 +1,59 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = 0;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	document.getElementById("predict_program").value = callback('algplat_app_predict_get_predict_program');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+    <div>
+		<input type="button" value="关闭" onclick="crawler_popup_wnd_hide('popup_view_predict_program');"/>
+	</div>
+
+	<div style="margin-top:10px;">
+		<textarea id="predict_program" style="width:100%;" rows="43"></textarea>
+	</div>
+	
+</body>
+</html>

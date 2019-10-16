@@ -1,0 +1,201 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function updateList(sort_fields) {
+	var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+	if(sort_fields == '') {
+		return;
+	}
+	
+	var fields = sort_fields.split(";");
+    for (var i = 0; i < fields.length; i++) {
+        var items = fields[i].split(",");
+		var field = parseInt(items[0]);
+		var type = items[1];
+		var sort = items[2];
+		
+        var row = table.insertRow(i + 1);
+        //row.setAttribute('bgcolor', '#CCCCCC');
+
+        var cell = row.insertCell(0);
+        cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+
+        cell = row.insertCell(1);
+        cell.innerHTML = field + 1;
+
+        cell = row.insertCell(2);
+        cell.innerHTML = callback('algplat_app_train_model_list_field_name', field);
+		
+		cell = row.insertCell(3);
+        cell.innerHTML = type;
+		
+		cell = row.insertCell(4);
+        cell.innerHTML = sort;
+    }
+}
+	
+function addField() {
+	var field = parseInt(document.getElementById('field').value);
+	var table = document.getElementById('list');
+	var row_index = table.rows.length;
+	var row = table.insertRow(row_index);
+	
+	var cell = row.insertCell(0);
+	cell.innerHTML = '<input id="check_' + (row_index - 1) + '" type="checkbox"/>' + row_index;
+
+	cell = row.insertCell(1);
+	cell.innerHTML = field + 1;
+
+	cell = row.insertCell(2);
+	cell.innerHTML = callback('algplat_app_train_model_list_field_name', field);
+	
+	cell = row.insertCell(3);
+	cell.innerHTML = document.getElementById('type').value;
+	
+	cell = row.insertCell(4);
+	cell.innerHTML = document.getElementById('sort').value;
+}
+
+function delField() {
+	var table = document.getElementById('list');
+	var len = table.rows.length;
+	var ret = '';
+    for (i = 0; i < len - 1; i++) {
+		if (document.getElementById('check_' + i).checked) {
+            continue;
+        }
+		
+		if(ret != '') {
+			ret += ';';
+		}
+		
+		var row = table.rows[i + 1];
+		ret += (parseInt(row.cells[1].innerHTML) - 1);
+		ret += ',' + row.cells[3].innerHTML;
+		ret += ',' + row.cells[4].innerHTML;
+    }
+	
+	updateList(ret);
+}
+
+function commit(appIndex) {
+	var table = document.getElementById('list');
+	var len = table.rows.length;
+	var ret = '';
+    for (i = 0; i < len - 1; i++) {
+		if(i > 0) {
+			ret += ';';
+		}
+		
+		var row = table.rows[i + 1];
+		ret += (parseInt(row.cells[1].innerHTML) - 1);
+		ret += ',' + row.cells[3].innerHTML;
+		ret += ',' + row.cells[4].innerHTML;
+    }
+	
+	var err = callback('algplat_app_train_model_list_set_sort_fields', ret);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	
+	crawler_active_popup_runjs('popup_app_train_list', "refresh_list(" + appIndex + ");");
+	crawler_popup_wnd_hide('popup_app_model_list_sort_field');
+}
+
+function updateFields() {
+	var ops = document.getElementById('field').options;
+	ops.length = 0;
+	
+	var fieldNum = callback('algplat_app_train_model_list_field_num');
+    for (var i = 0; i < fieldNum; i++) {
+        var name = callback('algplat_app_train_model_list_field_name', i);
+		ops.add(new Option(name, i));
+	}
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var appIndex = 0;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+			if (namevalue[0] == 'appIndex') {
+                appIndex = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	updateFields();
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + appIndex + ');');
+	updateList(callback('algplat_app_train_model_list_get_sort_fields'));
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		<select id="field" style="width:150px;" >
+		</select>
+		<select id="type" style="margin-left:2px;width:80px;" >
+			<option value="字符串">字符串</option>
+			<option value="数值">数值</option>
+		</select>
+		<select id="sort" style="margin-left:2px;width:60px;" >
+			<option value="升序">升序</option>
+			<option value="降序">降序</option>
+		</select>
+		<input type="button" value="增加" onclick="addField();" style="margin-left:2px;"/>
+		<input type="button" value="删除" onclick="delField();"/>
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_model_list_sort_field');"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="50">序号</td>
+				<td width="100">字段序号</td>
+				<td width="200">字段名</td>
+				<td width="100">值类型</td>
+				<td width="150">升序|降序</td>
+			</tr>
+		</tbody></table>
+	</div>
+	
+</body>
+</html>

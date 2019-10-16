@@ -1,0 +1,96 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index) {
+
+	var label_from_first = 0;
+	if (document.getElementById('label_from_first').checked) {
+		label_from_first = 1;
+	}
+	
+	if(label_from_first == 0 && callback('algplat_data_get_recNum', index) == callback('algplat_data_get_labelNum', index)) {
+		alert("全部数据都已标注，请选择从头标注！");
+		return;
+	}
+	
+	var num_per_page = document.getElementById('num_per_page').value;
+	if(num_per_page == '' || num_per_page == '0') {
+		alert('请输入一页数量！');
+		return;
+	}
+	
+	var target_type = callback('algplat_data_get_target_type', index);
+	if(target_type == '数值' || target_type == '类别') {
+		crawler_popup_wnd_show(-1, '样本标注', 'popup_label_data.html?index=' + index + '&label_from_first=' + label_from_first + '&num_per_page=' + num_per_page, 1200, 800);
+	} else if(target_type == '文本实体') {
+		crawler_popup_wnd_show(-1, '文本标注', 'popup_label_text.html?index=' + index + '&label_from_first=' + label_from_first + '&num_per_page=' + num_per_page, 1200, 800);
+	} else {
+		alert('目标类型[' + target_type + ']的标注未实现！');
+	}
+	
+	crawler_popup_wnd_hide('popup_label_data_entry');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:20px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		从头标注
+		<input id="label_from_first" title="是从头开始标注还是继续上次的标注" type="checkbox"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		一页数量
+		<input id="num_per_page" title="一页标注的记录数量" type="text" value="10" style="width:150px;"/>
+	</div>
+	
+    <div style="margin-top:20px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_label_data_entry');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index) {
+
+	var pyfun = document.getElementById('pyfun').value;
+	if(pyfun == '') {
+		alert('请输入python方法！');
+		return;
+	}
+	
+	var classifier = 0;
+	if(document.getElementById('classifier').checked) {
+		classifier = 1;
+	}
+	
+	var regressor = 0;
+	if(document.getElementById('regressor').checked) {
+		regressor = 1;
+	}
+	
+	var cluster = 0;
+	if(document.getElementById('cluster').checked) {
+		cluster = 1;
+	}
+	
+	if(classifier + regressor + cluster == 0) {
+		alert('请设置类型！');
+		return;
+	}
+	
+	var greater_better = 0;
+	if(document.getElementById('greater_better').checked) {
+		greater_better = 1;
+	}
+	
+	var pyimport = document.getElementById('pyimport').value;
+	
+	var pydefine = document.getElementById('pydefine').value;
+	if(pydefine == '') {
+		alert('请输入定义！');
+		return;
+	}
+	
+	var desc = document.getElementById('desc').value;
+	
+	var msg = callback('algplat_add_evaluate', index, classifier, regressor, cluster, greater_better, pyfun, pyimport, pydefine, desc);
+    if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+	crawler_active_ui_runjs(2, "refresh();");
+	alert('操作成功');
+    crawler_popup_wnd_hide('popup_add_define_evaluate');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	if(index >= 0) {
+		document.getElementById("pyfun").value = callback('algplat_evaluate_get_fun', index);
+		document.getElementById('classifier').checked = callback('algplat_evaluate_get_classifier', index) == 1;
+		document.getElementById('regressor').checked = callback('algplat_evaluate_get_regressor', index) == 1;
+		document.getElementById('cluster').checked = callback('algplat_evaluate_get_cluster', index) == 1;
+		document.getElementById('greater_better').checked = callback('algplat_evaluate_get_greater_better', index) == 1;
+		document.getElementById("pyimport").value = callback('algplat_evaluate_get_import', index);
+		document.getElementById("pydefine").value = callback('algplat_evaluate_get_define', index);
+		document.getElementById("desc").value = callback('algplat_evaluate_get_desc', index);
+	}
+	
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		python方法
+		<input id="pyfun" type="text" style="width:630px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		类型
+		<input id="classifier" type="checkbox" style="margin-left:54px;" />分类
+		<input id="regressor" type="checkbox" style="margin-left:50px;" />回归
+		<input id="cluster" type="checkbox" style="margin-left:50px;" />聚类
+	</div>
+	
+	<div style="margin-top:10px;">
+		越大越好
+		<input id="greater_better" type="checkbox" checked style="margin-left:18px;" />
+	</div>
+	
+	<div style="margin-top:10px;">
+		import
+		<textarea id="pyimport" style="width:630px;margin-left:36px;" rows="5"></textarea>
+	</div>
+	
+	<div style="margin-top:10px;">
+		定义
+		<textarea id="pydefine" style="width:630px;margin-left:54px;" rows="20"></textarea>
+	</div>
+	
+	<div style="margin-top:10px;">
+		说明
+		<textarea id="desc" style="margin-left:54px;width:630px;" rows="15"></textarea>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok" />
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_add_define_evaluate');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

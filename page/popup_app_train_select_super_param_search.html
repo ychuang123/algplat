@@ -1,0 +1,187 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function loadEvaluate(index) {
+	var list_type = callback('algplat_app_get_evaluate_type', index);
+	callback('algplat_evaluate_refresh_list', list_type);
+	
+	var ops = document.getElementById('score').options;
+	ops.length = 0;
+	
+	var count = callback('algplat_evaluate_refresh_list_count');
+    for (i = 0; i < count; i++) {
+		var index = callback('algplat_evaluate_refresh_list_index', i);
+        var name = callback('algplat_evaluate_get_fun', index);
+		ops.add(new Option(name, index));
+	}
+}
+
+function commit(index, modelFlowIndexes) {
+	var trainSetShuffle = 0;
+	if(document.getElementById('trainSetShuffle').checked) {
+		trainSetShuffle = 1;
+	}
+	
+	var watch = document.getElementById('watch').value;
+	var cv = '';
+	var score = '';
+	var iter = '';
+	
+	if(!document.getElementById("SimpleGridSearch").checked) {
+		cv = document.getElementById('cv').value;
+		if(cv == '') {
+			alert('请输入cv！');
+			return;
+		}
+		score = document.getElementById('score').value;
+		score = callback('algplat_evaluate_get_fun', parseInt(score));
+	}
+	
+	if(document.getElementById("RandomizedSearchCV").checked) {
+		iter = document.getElementById('iter').value;
+		if(iter == '') {
+			alert('请输入采样！');
+			return;
+		}
+	}
+	
+	var err = callback('algplat_app_train_init', index, trainSetShuffle, watch, modelFlowIndexes, cv, score, iter);
+	if(err != '') {
+		alert(err);
+		crawler_popup_wnd_hide('popup_app_train_select_super_param_search');
+		return;
+	}
+	
+	if(callback('algplat_app_get_type', index) == 4) { //模式挖掘
+		crawler_popup_wnd_show(-1, '训练模型-模式挖掘', 'popup_app_train_mining.html?index=' + index + '&modelFlowIndexes=' + modelFlowIndexes, 1400, 900);
+	} else {
+		crawler_popup_wnd_show(-1, '训练模型', 'popup_app_train.html?index=' + index + '&modelFlowIndexes=' + modelFlowIndexes, 1400, 900);
+	}
+	
+	crawler_popup_wnd_hide('popup_app_train_select_super_param_search');
+}
+
+function canCV(appIndex, modelFlowIndexes) {
+	if(callback('algplat_app_get_type', appIndex) == 4) {
+		return '模式挖掘，不能交叉验证！';
+	}
+	
+	var modelFlowIndexArray = modelFlowIndexes.split("_");
+	for(var i = 0; i < modelFlowIndexArray.length; i++) {
+		var modelFlowIndex = parseInt(modelFlowIndexArray[i]);
+		if(callback('algplat_app_model_flow_super_param', appIndex, modelFlowIndex) == '{}') {
+			return '含有未设置参数的模型，不能交叉验证！';
+		}
+		if(callback('algplat_app_model_contain_tensorflow', appIndex, modelFlowIndex) == 1) {
+			return '含有 TensorFlow 模型，不能交叉验证！';
+		}
+	}
+	return '';
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	var modelFlowIndexes = '';
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'modelFlowIndexes') {
+                modelFlowIndexes = namevalue[1];
+            }
+        }
+    }
+	
+	var msg = canCV(index, modelFlowIndexes);
+	if(msg != '') {
+		document.getElementById("GridSearchCV").setAttribute('disabled', 'disabled');
+		document.getElementById("RandomizedSearchCV").setAttribute('disabled', 'disabled');
+		alert(msg);
+	} else {
+		loadEvaluate(index);
+	}
+	
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ',\'' + modelFlowIndexes + '\');');
+}
+
+function onCheck() {
+	if(document.getElementById("SimpleGridSearch").checked) {
+		document.getElementById("cv").setAttribute('disabled', 'disabled');
+		document.getElementById("score").setAttribute('disabled', 'disabled');
+	} else {
+		document.getElementById("cv").removeAttribute('disabled');
+		document.getElementById("score").removeAttribute('disabled');
+	}
+	
+	if(document.getElementById("RandomizedSearchCV").checked) {
+		document.getElementById("iter").removeAttribute('disabled');
+	} else {
+		document.getElementById("iter").setAttribute('disabled', 'disabled');
+	}
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:20px;margin-top:10px;">
+	<div style="margin-top:30px;">
+		<input type="radio" name="super_param_search" id="SimpleGridSearch" checked onclick="onCheck();" />简单网格搜索
+		<input type="radio" name="super_param_search" id="GridSearchCV" style="margin-left:30px;" onclick="onCheck();" />网格搜索+交叉验证
+		<input type="radio" name="super_param_search" id="RandomizedSearchCV" style="margin-left:30px;" onclick="onCheck();" />随机搜索+交叉验证
+	</div>
+	<div style="margin-top:15px;">
+		扰序
+		<input id="trainSetShuffle" type="checkbox" title="对训练集随机排序" />
+	</div>
+	<div style="margin-top:15px;">
+		监视
+		<input id="watch" type="text" style="margin-left:4px;width:400px;" title="监视模型系数。格式：modeName.varName，多项逗号分隔。all表示监视全部模型系数"/>
+	</div>
+	<div style="margin-top:15px;">
+		cv
+		<input id="cv" type="text" value="5" style="margin-left:22px;width:400px;" title="整数，划分数" disabled="disabled" />
+	</div>
+	<div style="margin-top:15px;">
+		评估
+		<select id="score" style="margin-left:4px;width:400px;" disabled="disabled" ></select>
+	</div>
+	<div style="margin-top:15px;">
+		采样
+		<input id="iter" type="text" value="10" style="margin-left:4px;width:400px;" title="整数，采样百分比" disabled="disabled" />
+	</div>
+	<div style="margin-top:20px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_train_select_super_param_search');" style="margin-left:5px;"/>
+	</div>
+</body>
+</html>

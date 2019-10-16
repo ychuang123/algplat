@@ -1,0 +1,226 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function onHead(index) {
+	crawler_popup_wnd_show(-1, '前10行记录', 'popup_summary_data_head.html?index=' + index, 1400, 600);
+}
+
+function join_array(array, len, split_str) {
+	var ret = '';
+	for(var i = 0; i < len; i++) {
+		if(i > 0) {
+			ret += ',';
+		}
+		ret += array[i];
+	}
+	return ret;
+}
+
+function onCmd(index, cmd) {
+	var table = document.getElementById('fields');
+    var selected = new Array();
+    var select_num = 0;
+	var count = callback('algplat_app_train_data_get_fieldNum', index);
+    for (i = 0; i < count; i++) {
+        if(cmd == 'select_all') {
+            document.getElementById('check_' + i).checked = true;
+        } else if (cmd == 'unselect') {
+            document.getElementById('check_' + i).checked = false;
+        } else if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if(cmd == 'curve') { // 坐标曲线
+        if (select_num == 0) {
+            alert('请选择字段！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个字段！');
+            return;
+        }
+		if(callback('algplat_app_train_data_get_field_type', index, selected[0]) != '数值') {
+			alert('请选择数值列！');
+			return;
+		}
+		crawler_popup_wnd_show(-1, '选择横坐标', 'popup_summary_data_curve_select_x.html?data=' + index + '&field=' + selected[0], 200, 150);
+    }
+	
+	if(cmd == 'hist') { // 数据分布
+        if (select_num == 0) {
+            alert('请选择字段！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个字段！');
+            return;
+        }
+		crawler_popup_wnd_show(-1, '数据分布', 'popup_summary_data_hist.html?data=' + index + '&field=' + selected[0], 700, 600);
+    }
+	
+	if(cmd == 'scatter') { // 散点图
+		if (select_num == 0) {
+            alert('请选择字段！');
+            return;
+        }
+        if (select_num < 2) {
+            alert('请选择2个或2个以上字段！');
+            return;
+        }
+		for(var i = 0; i < select_num; i++) {
+			if(callback('algplat_app_train_data_get_field_type', index, selected[i]) != '数值') {
+				alert('请选择数值列！');
+				return;
+			}
+		}
+        crawler_popup_wnd_show(-1, '选择自变量', 'popup_summary_data_scatter_select_x.html?data=' + index + '&field=' + join_array(selected, select_num, ','), 200, 150);
+    }
+	
+	if(cmd == 'boxplot') { // 箱型图
+		if (select_num == 0) {
+            alert('请选择字段！');
+            return;
+        }
+		for(var i = 0; i < select_num; i++) {
+			if(callback('algplat_app_train_data_get_field_type', index, selected[i]) != '数值') {
+				alert('请选择数值列！');
+				return;
+			}
+		}
+        crawler_popup_wnd_show(-1, '选择类型特征过滤数据', 'popup_summary_data_boxplot_filter.html?data=' + index + '&field=' + join_array(selected, select_num, ','), 1000, 500);
+    }
+	
+	if(cmd == 'relative') { // 相关性
+		if (select_num == 0) {
+            alert('请选择字段！');
+            return;
+        }
+        if (select_num < 2) {
+            alert('请选择2个或2个以上字段！');
+            return;
+        }
+		var field_type = callback('algplat_app_train_data_get_field_type', index, selected[0]);
+		for(var i = 1; i < select_num; i++) {
+			if(callback('algplat_app_train_data_get_field_type', index, selected[i]) != field_type) {
+				if (crawl_prompt_yes_or_no('选择列的值类型不同。是否要按类型值处理？') == 0) {
+					return;
+				}
+				break;
+			}
+		}
+        crawler_popup_wnd_show(-1, '选择被比较变量', 'popup_summary_data_relative_select_x.html?data=' + index + '&field=' + join_array(selected, select_num, ','), 200, 150);
+    }
+	
+	if(cmd == 'timeseries') { // 时间序列
+        if (select_num == 0) {
+            alert('请选择字段！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个字段！');
+            return;
+        }
+		if(callback('algplat_app_train_data_get_field_type', index, selected[0]) != '数值') {
+			alert('请选择数值列！');
+			return;
+		}
+		crawler_popup_wnd_show(-1, '设置参数', 'popup_summary_data_timeseries_set_param.html?data=' + index + '&field=' + selected[0], 200, 150);
+    }
+	
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = 0;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	var recNum = callback('algplat_app_train_data_get_recNum', index);
+	var fieldNum = callback('algplat_app_train_data_get_fieldNum', index);
+	var validRecNum = callback('algplat_app_train_data_get_validRecNum', index);
+	
+	var summary = '记录数：' + recNum + ', 字段数：' + fieldNum + ', 有效记录数：' + validRecNum +
+		' <input type="button" value="前10行记录" onclick="onHead(' + index + ');" style="width:100px;" />' +
+		' <input type="button" value="坐标曲线" title="显示某数值列的二维曲线" onclick="onCmd(' + index + ', \'curve\');" style="width:90px;" />' +
+		' <input type="button" value="数据分布" title="显示某列数据分布. 数值数据为直方图，类型数据为柱状图" onclick="onCmd(' + index + ', \'hist\');" style="width:90px;" />' +
+		' <input type="button" value="散点图" title="绘制某数值列为自变量，其他数值列为因变量的散点图" onclick="onCmd(' + index + ', \'scatter\');" style="width:70px;" />' +
+		' <input type="button" value="箱形图" title="绘制数值列的箱形图，可以选择类型特征过滤数据" onclick="onCmd(' + index + ', \'boxplot\');" style="width:70px;" />' +
+		' <input type="button" value="相关性" title="计算某列数据与其他列数据的相关系数" onclick="onCmd(' + index + ', \'relative\');" style="width:70px;" />' +
+		' <input type="button" value="时间序列" title="时间序列分解" onclick="onCmd(' + index + ', \'timeseries\');" style="width:90px;" />' +
+		' <input type="button" value="关闭" onclick="crawler_popup_wnd_hide(\'popup_summary_data\');" style="margin-left:10px;" />';
+	
+	document.getElementById("summary").innerHTML = summary;
+	
+	var table = document.getElementById('fields');
+	for(var i = 0; i < fieldNum; i++) {
+        var row = table.insertRow(i + 1);
+        var cell = row.insertCell(0);
+		cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1) + ' ' + callback('algplat_app_train_data_get_field_name', index, i);
+		
+        cell = row.insertCell(1);
+        cell.innerHTML = callback('algplat_app_train_data_get_field_type', index, i);
+		
+		var loss_rate = 100.0 * callback('algplat_app_train_data_get_field_loss', index, i) / recNum;
+		loss_rate = Math.round(loss_rate*100)/100;
+        cell = row.insertCell(2);
+        cell.innerHTML = loss_rate + '%';
+		
+        cell = row.insertCell(3);
+        cell.innerHTML = callback('algplat_app_train_data_get_field_summary', index, i);
+	}
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div id="summary">
+		
+	</div>
+    <div style="margin-top:10px;">
+		<table id="fields" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="150">字段</td>
+				<td width="100">值类型</td>
+				<td width="100">值缺失</td>
+				<td width="800">值摘要</td>
+			</tr>
+		</tbody></table>
+	</div>
+</body>
+</html>

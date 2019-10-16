@@ -1,0 +1,1 @@
+{"evaluate":{"opTime":1564928096,"classifier":1,"regressor":0,"cluster":0,"greaterBetter":1,"pythonFun":"sklearn.metrics.accuracy_score","pythonFunImport":"","pythonFunDefine":"","desc":"分类准确率","useExample":""}}

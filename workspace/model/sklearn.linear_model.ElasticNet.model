@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924150,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.ElasticNet","pythonClassImport":"","pythonClassDefine":"","desc":"增加系数惩罚，即正则化为L1+L2范数","inputParams":[],"studyParams":[],"useExample":""}}

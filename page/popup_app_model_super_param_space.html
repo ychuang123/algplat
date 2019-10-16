@@ -1,0 +1,166 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function addSuperParam(index, modelFlowIndex) {
+	crawler_popup_wnd_show(-1, '增加超参组合', 'popup_app_model_flow_chart_input_param.html?appIndex=' + index + '&modelFlowIndex=' + modelFlowIndex, 1400, 1000);
+}
+
+function modSuperParam(index, modelFlowIndex) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = table.rows.length - 1;
+    for (i = 0; i < count; i++) {
+        if (document.getElementById('check_' + i).checked) {
+			selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if(select_num != 1) {
+		alert('请选择一个要修改的超参组合！');
+		return;
+	}
+	
+	crawler_popup_wnd_show(-1, '修改超参组合', 'popup_app_model_flow_chart_input_param.html?appIndex=' + index + '&modelFlowIndex=' + modelFlowIndex + '&paramIndex=' + selected[0], 1400, 1000);
+}
+
+function delSuperParam(index, modelFlowIndex) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = table.rows.length - 1;
+    for (i = 0; i < count; i++) {
+        if (document.getElementById('check_' + i).checked) {
+			selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if(select_num != 1) {
+		alert('请选择一个要删除的超参组合！');
+		return;
+	}
+	
+	callback('algplat_model_del_super_param_space', index, modelFlowIndex, selected[0]);
+	crawler_active_popup_runjs('popup_app_modelFlow_list', 'refresh_param(' + index + ', ' + modelFlowIndex + ');');
+	refresh_list(index, modelFlowIndex);
+}
+
+function copySuperParam(index, modelFlowIndex) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = table.rows.length - 1;
+    for (i = 0; i < count; i++) {
+        if (document.getElementById('check_' + i).checked) {
+			selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if(select_num != 1) {
+		alert('请选择一个要复制的超参组合！');
+		return;
+	}
+	
+	callback('algplat_model_copy_super_param_space', index, modelFlowIndex, selected[0]);
+	crawler_active_popup_runjs('popup_app_modelFlow_list', 'refresh_param(' + index + ', ' + modelFlowIndex + ');');
+	refresh_list(index, modelFlowIndex);
+}
+
+function refresh_list(index, modelFlowIndex) {
+
+	var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+	var count = callback('algplat_app_super_param_space_count', index, modelFlowIndex);
+	for(var i = 0; i < count; i++) {
+		var row = table.insertRow(i + 1);
+		var cell = row.insertCell(0);
+		cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+		
+		cell = row.insertCell(1);
+		var v = callback('algplat_app_super_param_space_json', index, modelFlowIndex, i);
+		v = v.replace('<', '&lt;');
+		v = v.replace('>', '&gt;');
+		cell.innerHTML = v;
+	}
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	var modelFlowIndex = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'modelFlowIndex') {
+                modelFlowIndex = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	document.getElementById("id_add").setAttribute('onclick', 'addSuperParam(' + index + ',' + modelFlowIndex + ');');
+	document.getElementById("id_mod").setAttribute('onclick', 'modSuperParam(' + index + ',' + modelFlowIndex + ');');
+    document.getElementById("id_del").setAttribute('onclick', 'delSuperParam(' + index + ',' + modelFlowIndex + ');');
+	document.getElementById("id_copy").setAttribute('onclick', 'copySuperParam(' + index + ',' + modelFlowIndex + ');');
+	
+	refresh_list(index, modelFlowIndex);
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		<input type="button" value="增加" title="增加超参组合" id="id_add"/>
+		<input type="button" value="修改" title="修改当前选择的超参组合" id="id_mod"/>
+		<input type="button" value="删除" title="删除当前选择的超参组合" id="id_del"/>
+		<input type="button" value="复制" title="复制当前选择的超参组合" id="id_copy"/>
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_app_model_super_param_space');"/>
+	</div>
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="100">序号</td>
+				<td width="1000">超参组合</td>
+			</tr>
+		</tbody></table>
+	</div>
+</body>
+</html>

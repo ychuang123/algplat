@@ -1,0 +1,206 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function AddNewTask() {
+	crawler_popup_wnd_show(-1, '增加新的数据标注任务', 'popup_tool_add_data_lable_task.html', 800, 355);
+}
+
+function init_data(index) {
+	var initComplete = callback('algplat_data_init_complete', index);
+	if(initComplete == 1) {
+		return;
+	}
+	
+	callback('algplat_data_init', index);
+	var table = document.getElementById('list');
+	var row = table.rows[index + 1];
+    row.cells[8].innerHTML = callback('algplat_data_get_fieldNum', index);
+	row.cells[9].innerHTML = callback('algplat_data_get_recNum', index);
+	row.cells[10].innerHTML = callback('algplat_data_get_labelNum', index);
+}
+
+function refresh_list() {
+    var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+    var count = callback('algplat_data_get_count');
+    for (i = 0; i < count; i++) {
+        
+        var row = table.insertRow(i + 1);
+        //row.setAttribute('bgcolor', '#CCCCCC');
+
+        var cell = row.insertCell(0);
+        cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+		
+		var initComplete = callback('algplat_data_init_complete', i);
+		
+        cell = row.insertCell(1);
+        cell.innerHTML = callback('algplat_data_get_target_type', i);
+		
+        cell = row.insertCell(2);
+        cell.innerHTML = callback('algplat_data_get_label_entity', i);
+		
+        cell = row.insertCell(3);
+        cell.innerHTML = callback('algplat_data_get_path', i);
+		
+        cell = row.insertCell(4);
+        cell.innerHTML = callback('algplat_data_get_charset', i);
+		
+        cell = row.insertCell(5);
+        cell.innerHTML = callback('algplat_data_get_delimiter', i);
+		
+        cell = row.insertCell(6);
+		var firstLineTitle = callback('algplat_data_get_firstLineTitle', i)
+		if(firstLineTitle == 0) {
+			cell.innerHTML = '否';
+		} else {
+			cell.innerHTML = '是';
+		}
+		
+		cell = row.insertCell(7);
+        cell.innerHTML = callback('algplat_data_get_label_fields', i);
+		
+        cell = row.insertCell(8);
+		if(initComplete == 1) {
+			cell.innerHTML = callback('algplat_data_get_fieldNum', i);
+		} else {
+			cell.innerHTML = '-';
+		}
+		
+        cell = row.insertCell(9);
+		if(initComplete == 1) {
+			cell.innerHTML = callback('algplat_data_get_recNum', i);
+		} else {
+			cell.innerHTML = '-';
+		}
+		
+        cell = row.insertCell(10);
+		if(initComplete == 1) {
+			cell.innerHTML = callback('algplat_data_get_labelNum', i);
+		} else {
+			cell.innerHTML = '-';
+		}
+    }
+}
+
+function on_cmd(cmd) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = callback('algplat_data_get_count');
+    for (i = 0; i < count; i++) {
+        if(cmd == 'select_all') {
+            document.getElementById('check_' + i).checked = true;
+        } else if (cmd == 'unselect') {
+            document.getElementById('check_' + i).checked = false;
+        } else if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if(cmd == 'cmd_del_task') {
+        if (select_num == 0) {
+            alert('请选择数据标注任务！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个数据标注任务！');
+            return;
+        }
+		for (i = count - 1; i >= 0; i--) {
+			callback('algplat_data_del', selected[i]);
+		}
+		refresh_list();
+    }
+	if(cmd == 'cmd_head') {
+        if (select_num == 0) {
+            alert('请选择数据标注任务！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个数据标注任务！');
+            return;
+        }
+		init_data(selected[0]);
+		crawler_popup_wnd_show(-1, '前10行记录', 'popup_summary_data_head.html?data=1&index=' + selected[0], 1400, 600);
+    }
+	if(cmd == 'cmd_start_label') {
+        if (select_num == 0) {
+            alert('请选择数据标注任务！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个数据标注任务！');
+            return;
+        }
+		init_data(selected[0]);
+		crawler_popup_wnd_show(-1, '标注数据', 'popup_label_data_entry.html?index=' + selected[0], 300, 180);
+    }
+	if(cmd == 'cmd_exp_data_set') {
+        if (select_num == 0) {
+            alert('请选择数据标注任务！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个数据标注任务！');
+            return;
+        }
+        crawler_popup_wnd_show(-1, '根据标注数据生成新的数据集', 'popup_exp_data_set.html?index=' + selected[0], 600, 800);
+    }
+}
+
+</script>
+</head>
+
+<body onLoad="refresh_list();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		<input type="button" value="增加任务" title="增加新的数据标注任务" onclick="AddNewTask();" style="width:90px;" />
+		<input type="button" value="删除任务" title="删除选择的数据标注任务" onclick="on_cmd('cmd_del_task');" style="width:90px;" />
+		<input type="button" value="前10行记录" title="显示选择任务的前10行数据" onclick="on_cmd('cmd_head');" style="width:100px;" />
+		<input type="button" value="开始标注" title="启动数据标注" onclick="on_cmd('cmd_start_label');" style="width:90px;" />
+		<input type="button" value="导出数据集" title="根据标注数据生成新的数据集" onclick="on_cmd('cmd_exp_data_set');" style="width:100px;" />
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_tool_label_data');" style="margin-left:5px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="50">序号</td>
+				<td width="100">目标类型</td>
+				<td width="100">标注实体</td>
+				<td width="600">文件路径</td>
+				<td width="100">文件编码</td>
+				<td width="100">字段分隔</td>
+				<td width="100">首行标题</td>
+				<td width="100">标注字段</td>
+				<td width="100">字段数</td>
+				<td width="100">记录数</td>
+				<td width="100">标注数</td>
+			</tr>
+		</tbody></table>
+	</div>
+</body>
+</html>

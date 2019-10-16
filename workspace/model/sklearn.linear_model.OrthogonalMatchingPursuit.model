@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924132,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.OrthogonalMatchingPursuit","pythonClassImport":"","pythonClassDefine":"","desc":"OMP 在非零系数的个数上加约束","inputParams":[],"studyParams":[],"useExample":""}}

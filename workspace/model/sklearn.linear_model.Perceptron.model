@@ -1,0 +1,1 @@
+{"model":{"opTime":1564923963,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":1,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.Perceptron","pythonClassImport":"","pythonClassDefine":"","desc":"感知机 基于错误学习","inputParams":[],"studyParams":[],"useExample":""}}

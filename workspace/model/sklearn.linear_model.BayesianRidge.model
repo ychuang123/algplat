@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924120,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.BayesianRidge","pythonClassImport":"","pythonClassDefine":"","desc":"贝叶斯岭回归 通过贝叶斯推理调整参数","inputParams":[],"studyParams":[],"useExample":""}}

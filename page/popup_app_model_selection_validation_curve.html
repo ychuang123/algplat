@@ -1,0 +1,149 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function loadEvaluate(index) {
+	var list_type = callback('algplat_app_get_evaluate_type', index);
+	callback('algplat_evaluate_refresh_list', list_type);
+	
+	var ops = document.getElementById('score').options;
+	ops.length = 0;
+	
+	var count = callback('algplat_evaluate_refresh_list_count');
+    for (i = 0; i < count; i++) {
+		var index = callback('algplat_evaluate_refresh_list_index', i);
+        var name = callback('algplat_evaluate_get_fun', index);
+		ops.add(new Option(name, index));
+	}
+}
+
+function commit(index, modelFlowIndex) {
+	var trainSetShuffle = 0;
+	if(document.getElementById('trainSetShuffle').checked) {
+		trainSetShuffle = 1;
+	}
+	
+	var init_super_param = document.getElementById('init_super_param').value;
+	if(init_super_param == '') {
+		alert('请输入初始超参！');
+		return;
+	}
+	
+	var validation_param_name = document.getElementById('validation_param_name').value;
+	if(validation_param_name == '') {
+		alert('请输入验证超参名！');
+		return;
+	}
+	
+	var validation_param_value = document.getElementById('validation_param_value').value;
+	if(validation_param_value == '') {
+		alert('请输入验证超参值！');
+		return;
+	}
+	
+	var cv = document.getElementById('cv').value;
+	if(cv == '') {
+		alert('请输入cv！');
+		return;
+	}
+	
+	var score = document.getElementById('score').value;
+	score = callback('algplat_evaluate_get_fun', parseInt(score));
+	
+	var err = callback('algplat_app_model_selection_curve_init', index, modelFlowIndex, trainSetShuffle, init_super_param, validation_param_name, validation_param_value, cv, score);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	
+    crawler_popup_wnd_show(-1, '验证曲线', 'popup_app_model_selection_curve.html', 1400, 830);
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	var modelFlowIndex = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'modelFlowIndex') {
+                modelFlowIndex = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	loadEvaluate(index);
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ',' + modelFlowIndex + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:20px;margin-top:10px;">
+	
+	<div style="margin-top:15px;">
+		训练集随机
+		<input id="trainSetShuffle" type="checkbox" title="训练前是否对训练集随机排序" />
+	</div>
+	
+	<div style="margin-top:15px;">
+		初始超参
+		<textarea id="init_super_param" style="margin-left:18px;width:800px;" rows="12" ></textarea>
+	</div>
+	
+	<div style="margin-top:15px;">
+		验证超参名
+		<input id="validation_param_name" type="text" style="width:800px;"/>
+	</div>
+	
+	<div style="margin-top:15px;">
+		验证超参值
+		<input id="validation_param_value" type="text" style="width:800px;" title="[1,2,3], np.arange(0,3), np.linspace(0.1,5,5)"/>
+	</div>
+	
+	<div style="margin-top:15px;">
+		cv
+		<input id="cv" type="text" value="5" style="margin-left:72px;width:800px;" title="空表示不交叉验证，使用测试集评估效果。时间序列必须为空。" />
+	</div>
+	
+	<div style="margin-top:10px;">
+		评估
+		<select id="score" style="margin-left:54px;width:800px;" >
+		</select>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_model_selection_validation_curve');" style="margin-left:5px;"/>
+	</div>
+</body>
+</html>

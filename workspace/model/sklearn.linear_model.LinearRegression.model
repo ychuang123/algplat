@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924144,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.LinearRegression","pythonClassImport":"","pythonClassDefine":"","desc":"OLS 残差平方和最小，奇异值分解","inputParams":[],"studyParams":[],"useExample":""}}

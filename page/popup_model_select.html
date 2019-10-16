@@ -1,0 +1,171 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(caller) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = table.rows.length - 1;
+    for (i = 0; i < count; i++) {
+        if (document.getElementById('check_' + i).checked) {
+			selected[select_num] = callback('algplat_model_refresh_list_index', i);
+            select_num += 1;
+        }
+    }
+	
+	if(select_num == 0) {
+		alert('请选择插件！');
+		return;
+	}
+	
+	if(select_num > 1) {
+		alert('请选择一个插件！');
+		return;
+	}
+	
+	crawler_active_popup_runjs(caller, 'onSelectModel(' + selected[0] + ');');
+	crawler_popup_wnd_hide('popup_model_select');
+}
+
+function refresh_list() {
+	
+	// 删除表格的旧数据
+	var table = document.getElementById('list');
+	var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+	// 添加新数据
+	var count = callback('algplat_model_refresh_list_count');
+    for (i = 0; i < count; i++) {
+        var index = callback('algplat_model_refresh_list_index', i);
+        var row = table.insertRow(i + 1);
+        //row.setAttribute('bgcolor', '#CCCCCC');
+
+        var cell = row.insertCell(0);
+        cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+
+        cell = row.insertCell(1);
+        cell.innerHTML = callback('algplat_model_get_class', index);
+		
+		var model_type = '';
+		if(callback('algplat_model_get_supervised', index) == 1) {
+			model_type = '监督';
+		}
+		if(callback('algplat_model_get_preprocess', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '预处理';
+		}
+		if(callback('algplat_model_get_featureSelect', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '特征选择';
+		}
+		if(callback('algplat_model_get_classifier', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '分类';
+		}
+		if(callback('algplat_model_get_regressor', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '回归';
+		}
+		if(callback('algplat_model_get_cluster', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '聚类';
+		}
+		if(callback('algplat_model_get_timeSeries', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '时序';
+		}
+		if(callback('algplat_model_get_mining', index) == 1) {
+			if(model_type != '') {
+				model_type += ' ';
+			}
+			model_type += '模式';
+		}
+		cell = row.insertCell(2);
+        cell.innerHTML = model_type;
+		
+        cell = row.insertCell(3);
+        cell.innerHTML = callback('algplat_model_get_desc', i);
+    }
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var caller = 0;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+			if (namevalue[0] == 'caller') {
+                caller = namevalue[1];
+            }
+        }
+    }
+	
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(\'' + caller + '\');');
+	refresh_list();
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+	<div style="margin-top:10px;">
+		<span>
+			<input type="button" value="确定" title="返回选择的模型" id="id_ok" />
+			<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_model_select');" />
+		</span>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="50">序号</td>
+				<td width="100">名称</td>
+				<td width="100">类型</td>
+				<td width="500">备注</td
+			</tr>
+		</tbody></table>
+	</div>
+</body>
+</html>

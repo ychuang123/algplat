@@ -1,0 +1,133 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index) {
+
+	var name = document.getElementById('name').value;
+	if(name == '') {
+		alert('请输入名称！');
+		return;
+	}
+	
+	var plugin_type = '';
+	if(document.getElementById("plugin_python_fun").checked) {
+		plugin_type = 'python函数';
+	} else if(document.getElementById("plugin_python_class").checked) {
+		plugin_type = 'python类';
+	}
+	
+	var pyimport = document.getElementById('pyimport').value;
+	
+	var pydefine = document.getElementById('pydefine').value;
+	if(pydefine == '') {
+		alert('请输入定义！');
+		return;
+	}
+	
+	var desc = document.getElementById('desc').value;
+	
+    var msg = callback('algplat_add_plugin', index, name, plugin_type, pyimport, pydefine, desc);
+	if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+    crawler_active_ui_runjs(2, "refresh();");
+	alert('操作成功！');
+	crawler_popup_wnd_hide('popup_add_define_plugin');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	if(index >= 0) {
+		document.getElementById("name").value = callback('algplat_plugin_get_name', index);
+		document.getElementById("pyimport").value = callback('algplat_plugin_get_pyimport', index);
+		document.getElementById("pydefine").value = callback('algplat_plugin_get_pydefine', index);
+		document.getElementById("desc").value = callback('algplat_plugin_get_desc', index);
+		
+		var plugin_type = callback('algplat_plugin_get_type', index);
+		if(plugin_type == 'python函数') {
+			document.getElementById("plugin_python_fun").checked = true;
+		} else if(plugin_type == 'python类') {
+			document.getElementById("plugin_python_class").checked = true;
+		}
+	}
+	
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		名称
+		<input id="name" type="text" style="margin-left:36px;width:630px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		类型
+		<input type="radio" name="plugin_type" id="plugin_python_fun" style="margin-left:36px;" checked/>python函数
+		<input type="radio" name="plugin_type" id="plugin_python_class" style="margin-left:40px;"/>python类
+	</div>
+	
+	<div style="margin-top:10px;">
+		import
+		<textarea id="pyimport" style="width:630px;margin-left:18px;" rows="5"></textarea>
+	</div>
+	
+	<div style="margin-top:10px;">
+		定义
+		<textarea id="pydefine" style="width:630px;margin-left:36px;" rows="20"></textarea>
+	</div>
+	
+	<div style="margin-top:10px;">
+		备注
+		<textarea id="desc" style="margin-left:36px;width:630px;" rows="15"></textarea>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_add_define_plugin');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

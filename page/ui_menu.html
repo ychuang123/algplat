@@ -1,0 +1,74 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	height: 26px;
+	width: 84px;
+	border: 1px;
+}
+[my_attr_menu_unselect]
+{
+    color: white;
+	background-color: #87A3C9;
+}
+[my_attr_menu_selected]
+{
+	color: #000000;
+    background-color:#00E3E3;
+}
+</style>
+
+<script type="text/javascript">
+
+function update(sel_menu) {
+    var menu_ids = crawler_get_menu_ids();
+    var id_array = menu_ids.split(",");
+    for (var i = 0; i < id_array.length; i++) {
+        var id = id_array[i];
+        if (id == sel_menu) {
+            document.getElementById(id).removeAttribute("my_attr_menu_unselect");
+            document.getElementById(id).setAttribute("my_attr_menu_selected", "on");
+        } else {
+            document.getElementById(id).removeAttribute("my_attr_menu_selected");
+            document.getElementById(id).setAttribute("my_attr_menu_unselect", "on");
+        }
+    }
+}
+
+function on_enter(id) {
+	crawler_enter_menu(id);
+}
+
+function load() {
+    var html = '';
+    var menu_ids = crawler_get_menu_ids();
+    var id_array = menu_ids.split(",");
+    for (var i = 0; i < id_array.length; i++) {
+        var id = id_array[i];
+		var mtop = i == 0 ? 10 : 15;
+		var menu_select = i == 0 ? ' my_attr_menu_selected="on"' : ' my_attr_menu_unselect="on"';
+		
+        html += '<div';
+        html += ' style="margin-top:' + mtop + 'px;margin-left:4px;">';
+        html += '<input type="button" id="' + id + '"';
+        html += ' value="' + crawler_get_menu_name(id) + '"';
+        html += ' title="' + crawler_get_menu_title(id) + '"';
+        html += ' onclick="on_enter(\'' + id + '\');"';
+        html += ' style="width:80px;" ' + menu_select + '/></div>';
+    }
+    document.getElementById("b").innerHTML = html;
+}
+
+</script>
+</head>
+<body onLoad="load();" bgcolor="#666" style="margin-top:6px;margin-left:6px;margin-right:8px;">
+<div style="margin-top:7px;margin-left:6px;">
+<font style="FONT-FAMILY:楷体;font-size:20px;color:#0F0;">小白分析</font>
+</div>
+<div id="b">
+</div>
+</body>
+</html>

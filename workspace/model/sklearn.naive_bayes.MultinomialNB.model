@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924343,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":1,"regressor":0,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.naive_bayes.MultinomialNB","pythonClassImport":"","pythonClassDefine":"","desc":"多项式朴素贝叶斯","inputParams":[],"studyParams":[],"useExample":""}}

@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924198,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.ARDRegression","pythonClassImport":"","pythonClassDefine":"","desc":"ARD 通过贝叶斯推理调整参数，针对稀疏权重","inputParams":[],"studyParams":[],"useExample":""}}

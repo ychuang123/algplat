@@ -1,0 +1,73 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function on_ok(data, field) {
+	var freq = document.getElementById('freq').value;
+	if(freq == '') {
+		alert('请输入周期长度！');
+		return;
+	}
+	
+	crawler_popup_wnd_hide('popup_summary_data_timeseries_set_param');
+	crawler_popup_wnd_show(-1, '时间序列分解', 'popup_summary_data_timeseries.html?data=' + data + '&field=' + field + '&freq=' + freq, 700, 600);
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+	var data = 0;
+    var field = '';
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+			if (namevalue[0] == 'data') {
+                data = parseInt(namevalue[1]);
+            }
+            if (namevalue[0] == 'field') {
+                field = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	document.getElementById("btn_ok").setAttribute('onclick', 'on_ok(' + data + ', ' + field + ')');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+	<div>
+		周期长度
+		<input id="freq" type="text" style="width:50px;"/>
+	</div>
+	<div style="margin-top:10px;">
+		<input type="button" value="确定" id="btn_ok" />
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_summary_data_timeseries_set_param');" />
+	</div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+﻿<html>
+<head>
+
+<style type="text/css">
+body
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: black;
+}
+</style>
+</head>
+<body>
+<div style="margin-top:10px;margin-left:8px;margin-right:10px;">
+定义要扫码的器件的条件及占用位置数量
+</div>
+<ol>
+	<li>
+		点击 <font style="color:blue;">物料排位</font> 按钮，进入物料排位模式
+	</li>
+	<li>
+		点击 <font style="color:blue;">扫码规则</font> 按钮，弹出设置对话框
+	</li>
+	<li>
+		输入要扫码的器件的条件及占用位置数量
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		每行为一种情况。格式为：<font style="color:blue;">${占用位置数量}</font>:<font style="color:blue;">${条件}</font>,<font style="color:blue;">${条件}</font>
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		占用位置数量与条件之间使用冒号分隔，条件与条件之间使用逗号分割
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		每个条件的格式为：<font style="color:blue;">${属性名}</font>${操作符}<font style="color:blue;">${参数}</font>
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		操作符包含下面5个：
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		<font style="color:blue;">&#61;</font> 等于
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		<font style="color:blue;">&gt;</font> 大于
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		<font style="color:blue;">&gt;&#61;</font> 等于等于
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		<font style="color:blue;">&lt;</font> 小于
+		</div>
+		<div style="margin-top:8px;margin-left:2px;margin-right:10px;">
+		<font style="color:blue;">&lt;&#61;</font> 小于等于
+		</div>
+	</li>
+	<li>
+		点击 <font style="color:blue;">确定</font> 按钮
+	</li>
+</ol>
+<img style="margin-left:10px;" border="1" src="img/content_scan_rule.png"/>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"evaluate":{"opTime":1564927933,"classifier":1,"regressor":0,"cluster":0,"greaterBetter":1,"pythonFun":"f1_macro","pythonFunImport":"from sklearn.metrics import f1_score","pythonFunDefine":"def f1_macro(y_true, y_pred):\n    return f1_score(y_true, y_pred, average='macro')","desc":"ºêÆ½¾ù","useExample":""}}

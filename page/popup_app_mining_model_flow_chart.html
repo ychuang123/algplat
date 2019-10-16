@@ -1,0 +1,203 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+
+/* 向上箭头 */
+.to_top {
+	width: 0;
+	height: 0;
+	border-bottom: 30px solid #f0f;
+	border-left: 30px solid transparent;
+	border-right: 30px solid transparent;
+}
+
+/* 向左箭头 */
+.to_left {
+	width: 0;
+	height: 0;
+	border-right: 30px solid #ffd900;
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+}
+
+/* 向右箭头 */
+.to_right {
+	width: 0;
+	height: 0;
+	border-left: 30px solid greenyellow;
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+}
+
+/* 向下箭头 */
+.to_bottom {
+	width: 0;
+	height: 0;
+	border-top: 30px solid skyblue;
+	border-left: 30px solid transparent;
+	border-right: 30px solid transparent;
+}
+
+</style>
+<script type="text/javascript">
+
+function update_ui() {
+    document.getElementById('x_node').innerHTML = callback('algplat_app_model_flow_x_html');
+	on_cmd('unselect');
+}
+
+function set_model() {
+	crawler_popup_wnd_show(-1, '设置模型', 'popup_app_model_flow_set_predict_model.html?list_type=model_list_mining', 270, 140);
+}
+
+function on_cmd(cmd) {
+	var checkIds = callback('algplat_app_model_flow_get_checkids').split(",");
+	
+	var selected = new Array();
+    var select_num = 0;
+    for(var i = 0; i < checkIds.length; i++) {
+		var id = parseInt(checkIds[i]);
+		if(cmd == 'select_all') {
+            document.getElementById('check_' + id).checked = true;
+        } else if (cmd == 'unselect') {
+            document.getElementById('check_' + id).checked = false;
+		} else if(document.getElementById('check_' + id).checked) {
+            selected[select_num] = id;
+            select_num += 1;
+        }
+    }
+	
+	if(cmd == 'add_preprocess') {
+		if (select_num == 0) {
+            alert('请选择节点！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个节点！');
+            return;
+        }
+        crawler_popup_wnd_show(-1, '增加预处理', 'popup_app_model_flow_add_preprocess_entry.html?caller=popup_app_mining_model_flow_chart&node=' + selected[0], 330, 230);
+		return;
+	}
+	
+	if(cmd == 'del_node') {
+		if(document.getElementById('check_0').checked) {
+			alert('初始特征不能删除！');
+			return;
+		}
+		if(document.getElementById('check_1').checked) {
+			alert('初始目标不能删除！');
+			return;
+		}
+		if (select_num == 0) {
+            alert('请选择节点！');
+            return;
+        }
+		var ids = ''
+		for(var i = 0; i < select_num; i++) {
+			if(i > 0) {
+				ids += ',';
+			}
+			ids += selected[i];
+		}
+		callback('algplat_app_model_flow_del_nodes', ids);
+		update_ui();
+		return;
+	}
+}
+
+function commit(index) {
+	var err = callback('algplat_verify_app_mode_flow_chart', index);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+    crawler_popup_wnd_show(-1, '保存模型流程', 'popup_app_model_flow_save.html?caller=popup_app_mining_model_flow_chart&index=' + index, 380, 150);
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	var modelFlowIndex = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'modelFlowIndex') {
+                modelFlowIndex = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	document.getElementById('div_input_root').innerHTML = '初始特征';
+	
+	callback('algplat_app_model_flow_init', index, modelFlowIndex);
+	update_ui();
+	
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		<input type="button" value="增加预处理" onclick="on_cmd('add_preprocess');" style="width:100px;"/>
+		<input type="button" value="设置模型" onclick="set_model();" style="width:90px;"/>
+		<input type="button" value="删除" title="删除所选节点" onclick="on_cmd('del_node');" style="margin-left:1px;"/>
+		<input type="button" value="选择全部" onclick="on_cmd('select_all');" style="margin-left:10px;width:90px;"/>
+		<input type="button" value="取消选择" onclick="on_cmd('unselect');" style="margin-left:1px;width:90px;"/>
+		<input type="button" value="保存" id="id_ok" style="margin-left:10px;" />
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_mining_model_flow_chart');" style="margin-left:1px;"/>
+	</div>
+	
+    <div style="border:1px solid #000;margin-top:10px;width:100%;height:790px;overflow:scroll;">
+		<table id="list" width="100%" >
+			<tbody>
+				<tr>
+					<td align="center">
+						<input id="check_0" type="checkbox"/>
+						<div id="div_input_root" style="display:block;border:1px solid #000;width:250px;head:100px;background-color: #C2B4D6;">
+						</div>
+						<input id="check_1" type="checkbox" style="display:none;"/>
+					</td>
+				</tr>
+				<tr>
+					<td align="center" valign="top">
+						<table><tbody id="x_node">
+						</tbody></table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+</body>
+</html>

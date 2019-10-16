@@ -1,0 +1,108 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 84px;
+	border: 1px;
+}
+td
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function refresh() {
+	
+    var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+    var count = callback('algplat_plugin_get_count');
+    for (i = 0; i < count; i++) {
+        
+        var row = table.insertRow(i + 1);
+        //row.setAttribute('bgcolor', '#CCCCCC');
+
+        var cell = row.insertCell(0);
+        cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+
+        cell = row.insertCell(1);
+        cell.innerHTML = callback('algplat_plugin_get_name', i);
+		
+        cell = row.insertCell(2);
+        cell.innerHTML = callback('algplat_plugin_get_type', i);
+		
+        cell = row.insertCell(3);
+        cell.innerHTML = callback('algplat_plugin_get_desc', i);
+    }
+}
+
+function on_cmd(cmd) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = callback('algplat_plugin_get_count');
+    for (i = 0; i < count; i++) {
+        if(cmd == 'select_all') {
+            document.getElementById('check_' + i).checked = true;
+        } else if (cmd == 'unselect') {
+            document.getElementById('check_' + i).checked = false;
+        } else if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if(cmd == 'cmd_mod_plugin') {
+        if (select_num == 0) {
+            alert('请选择插件！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个插件！');
+            return;
+        }
+		if(callback('algplat_plugin_get_package', selected[0]) == '') {
+			crawler_popup_wnd_show(-1, '修改自定义的python函数或类', 'popup_add_define_plugin.html?index=' + selected[0], 800, 880);
+		} else {
+			crawler_popup_wnd_show(-1, '修改python函数或类', 'popup_add_plugin.html?index=' + selected[0], 800, 440);
+		}
+    }
+	if(cmd == 'cmd_del_plugin') {
+        if (select_num == 0) {
+            alert('请选择插件！');
+            return;
+        }
+        if (crawl_prompt_yes_or_no('确定要删除选择的插件？') == 0) {
+			return;
+		}
+		for (i = count - 1; i >= 0; i--) {
+			callback('algplat_plugin_del', selected[i]);
+		}
+		refresh();
+    }
+}
+
+</script>
+</head>
+<body onLoad="refresh();" style="margin-top:6px;margin-left:6px;margin-right:8px;">
+<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+<tr style="background-color:#cccccc">
+<td width="50">序号</td>
+<td width="100">名称</td>
+<td width="100">类型</td>
+<td width="1000">备注</td>
+</tr>
+</tbody></table>
+</body>
+</html>

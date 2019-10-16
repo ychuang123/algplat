@@ -1,0 +1,319 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 84px;
+	border: 1px;
+}
+td
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function refresh_train_model_info(appIndex) {
+	var table = document.getElementById('list');
+	var pos = callback('algplat_app_refresh_list_pos', appIndex);
+	table.rows[pos + 1].cells[8].innerHTML = callback('algplat_app_model_flow_count', appIndex);
+	table.rows[pos + 1].cells[9].innerHTML = callback('algplat_app_get_train_model_num', appIndex);
+	table.rows[pos + 1].cells[10].innerHTML = callback('algplat_app_get_accept_train_model_key', appIndex);
+}
+
+function refresh() {
+	callback('algplat_app_refresh_list', 1);
+	
+    var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+    var count = callback('algplat_app_refresh_list_count');
+    for (i = 0; i < count; i++) {
+        var index = callback('algplat_app_refresh_list_index', i);
+        var row = table.insertRow(i + 1);
+        //row.setAttribute('bgcolor', '#CCCCCC');
+
+        var cell = row.insertCell(0);
+        cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+
+        cell = row.insertCell(1);
+        cell.innerHTML = callback('algplat_app_get_name', index);
+		
+        cell = row.insertCell(2);
+        cell.innerHTML = callback('algplat_app_get_trainData', index);
+
+        cell = row.insertCell(3);
+        cell.innerHTML = callback('algplat_app_get_testData', index);
+		
+        cell = row.insertCell(4);
+        cell.innerHTML = callback('algplat_app_get_charset', index);
+		
+        cell = row.insertCell(5);
+        cell.innerHTML = callback('algplat_app_get_delimiter', index);
+		
+        cell = row.insertCell(6);
+		var firstLineTitle = callback('algplat_app_get_firstLineTitle', index)
+		if(firstLineTitle == 0) {
+			cell.innerHTML = '否';
+		} else {
+			cell.innerHTML = '是';
+		}
+		
+        cell = row.insertCell(7);
+        cell.innerHTML = callback('algplat_app_get_outputField', index);
+		
+        cell = row.insertCell(8);
+        cell.innerHTML = callback('algplat_app_model_flow_count', index);
+		
+        cell = row.insertCell(9);
+        cell.innerHTML = callback('algplat_app_get_train_model_num', index);
+		
+        cell = row.insertCell(10);
+        cell.innerHTML = callback('algplat_app_get_accept_train_model_key', index);
+		
+		var desc = callback('algplat_app_get_desc', index);
+		if(desc.length > 6) {
+			desc = desc.substr(0, 5) + '...';
+		}
+		cell = row.insertCell(11);
+        cell.innerHTML = desc;
+    }
+}
+
+function on_cmd(cmd) {
+	var table = document.getElementById('list');
+    var selected = new Array();
+    var select_num = 0;
+	var count = callback('algplat_app_refresh_list_count');
+    for (i = 0; i < count; i++) {
+        if(cmd == 'select_all') {
+            document.getElementById('check_' + i).checked = true;
+        } else if (cmd == 'unselect') {
+            document.getElementById('check_' + i).checked = false;
+        } else if (document.getElementById('check_' + i).checked) {
+			selected[select_num] = callback('algplat_app_refresh_list_index', i);
+            select_num += 1;
+        }
+    }
+	
+	if(cmd == 'cmd_mod_app') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+        crawler_popup_wnd_show(-1, '修改应用', 'popup_add_app.html?type=1&index=' + selected[0], 830, 600);
+    }
+	if(cmd == 'cmd_explore_data') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		callback('algplat_app_train_data_summary', selected[0]);
+        crawler_popup_wnd_show(-1, '探索训练集数据特点', 'popup_summary_data.html?index=' + selected[0], 1400, 900);
+    }
+	if(cmd == 'cmd_set_model') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		crawler_popup_wnd_show(-1, '模型流程列表', 'popup_app_modelFlow_list.html?index=' + selected[0], 1500, 900);
+    }
+	if(cmd == 'cmd_del_app') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+        if (crawl_prompt_yes_or_no('确定要删除选择的应用？') == 0) {
+			return;
+		}
+		for (i = count - 1; i >= 0; i--) {
+			callback('algplat_app_del', selected[i]);
+		}
+		refresh();
+    }
+	if(cmd == 'cmd_predict') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		if(callback('algplat_app_get_accept_train_model_key', selected[0]) == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+        crawler_popup_wnd_show(-1, '使用模型预测数据', 'popup_app_predict.html?index=' + selected[0], 1000, 800);
+    }
+	if(cmd == 'cmd_view_train_program') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '训练程序', 'popup_view_train_program.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 1000, 800);
+    }
+	if(cmd == 'cmd_input_param') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '模型输入超参', 'popup_app_model_input_param_values.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 1000, 800);
+    }
+	if(cmd == 'cmd_best_input_param') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '模型最优输入超参', 'popup_app_model_best_input_param_values.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 1000, 800);
+    }
+	if(cmd == 'cmd_super_param') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '模型超参', 'popup_app_model_super_param_values.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 1000, 800);
+    }
+	if(cmd == 'cmd_study_param') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '模型系数', 'popup_app_model_study_param_values.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 1000, 800);
+    }
+	if(cmd == 'cmd_evaluate_result') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '评估结果', 'popup_app_evaluate_result.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 700, 600);
+    }
+	if(cmd == 'cmd_train_plot') {
+        if (select_num == 0) {
+            alert('请选择应用！');
+            return;
+        }
+		if (select_num > 1) {
+            alert('请选择1个应用！');
+            return;
+        }
+		
+		var modelKey = callback('algplat_app_get_accept_train_model_key', selected[0]);
+		if(modelKey == '') {
+			alert('请先训练并选择模型！');
+			return;
+		}
+		
+		crawler_popup_wnd_show(-1, '评估结果', 'popup_view_train_plot.html?appIndex=' + selected[0] + '&modelKey=' + modelKey, 700, 600);
+    }
+}
+
+</script>
+</head>
+<body onLoad="refresh();" style="margin-top:6px;margin-left:6px;margin-right:8px;">
+<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+<tr style="background-color:#cccccc">
+<td width="50">序号</td>
+<td width="100">名称</td>
+<td width="400">训练文件</td>
+<td width="400">测试文件</td>
+<td width="50">字符编码</td>
+<td width="50">字段分隔</td>
+<td width="50">首行标题</td>
+<td width="100">目标字段</td>
+<td width="80">模型流程</td>
+<td width="80">训练模型</td>
+<td width="80">采用模型</td>
+<td width="100">备注</td>
+</tr>
+</tbody></table>
+</body>
+</html>

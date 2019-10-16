@@ -1,0 +1,196 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index, type) {
+
+	var name = document.getElementById('name').value;
+	if(name == '') {
+		alert('请输入名称！');
+		return;
+	}
+	
+	var trainData = document.getElementById('trainData').value;
+	if(trainData == '') {
+		alert('请输入训练文件！');
+		return;
+	}
+	
+	var testData = document.getElementById('testData').value;
+	if(testData == '') {
+		alert('请输入测试文件！');
+		return;
+	}
+	
+	var delimiter = document.getElementById('delimiter').value;
+	if(delimiter == '') {
+		alert('请输入字段分隔符！');
+		return;
+	}
+	
+	var firstLineTitle = 0;
+	if (document.getElementById('firstLineTitle').checked) {
+		firstLineTitle = 1;
+	}
+	
+	var charset = '';
+	if(document.getElementById('charset_ansi').checked) {
+		charset = 'ansi';
+	} else if(document.getElementById('charset_utf_8').checked) {
+		charset = 'utf-8';
+	}
+	
+	var outputField = document.getElementById('outputField').value;
+	if(outputField == '') {
+		alert('请输入输出字段！');
+		return;
+	}
+	
+	var desc = document.getElementById('desc').value;
+	
+    var msg = callback('algplat_set_app', index, type, firstLineTitle, name, charset, delimiter, trainData, testData, outputField, desc);
+	if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+    crawler_popup_wnd_hide('popup_add_app');
+    crawler_active_ui_runjs(2, "refresh();");
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+	var type = 0;
+    var index = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'type') {
+                type = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	if(index >= 0) {
+		document.getElementById("name").value = callback('algplat_app_get_name', index);
+		document.getElementById("delimiter").value = callback('algplat_app_get_delimiter', index);
+		document.getElementById("firstLineTitle").checked = callback('algplat_app_get_firstLineTitle', index) == 1;
+		document.getElementById("outputField").value = callback('algplat_app_get_outputField', index);
+		document.getElementById("trainData").value = callback('algplat_app_get_trainData', index);
+		document.getElementById("testData").value = callback('algplat_app_get_testData', index);
+		document.getElementById("desc").value = callback('algplat_app_get_desc', index);
+		
+		var charset = callback('algplat_app_get_charset', index);
+		if(charset == 'ansi') {
+			document.getElementById("charset_ansi").checked = true;
+		} else if(charset == 'utf-8') {
+			document.getElementById("charset_utf_8").checked = true;
+		}
+		
+		document.getElementById("name").setAttribute('disabled', 'disabled');
+		document.getElementById("delimiter").setAttribute('disabled', 'disabled');
+		document.getElementById("firstLineTitle").setAttribute('disabled', 'disabled');
+		document.getElementById("outputField").setAttribute('disabled', 'disabled');
+	}
+	
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ',' + type + ');');
+}
+
+function select_train_file() {
+    file_path = crawler_get_select_file(1, 'txt', '文本文件');
+    if (file_path != '') {
+        document.getElementById("trainData").value = file_path;
+    }
+}
+
+function select_test_file() {
+    file_path = crawler_get_select_file(1, 'txt', '文本文件');
+    if (file_path != '') {
+        document.getElementById("testData").value = file_path;
+    }
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:1px;">
+		名称
+		<input id="name" type="text" style="margin-left:36px;width:620px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		字符编码
+		<input type="radio" name="charset" id="charset_ansi" checked/>ansi
+		<input type="radio" name="charset" id="charset_utf_8" style="margin-left:40px;"/>utf-8
+	</div>
+	
+	<div style="margin-top:10px;">
+		字段分隔
+		<input id="delimiter" type="text" style="width:620px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		首行标题
+		<input id="firstLineTitle" type="checkbox"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		目标字段
+		<input id="outputField" type="text" style="width:620px;" title="从1开始的字段编号，多值逗号分隔，连续为Min:Max。-1表示倒数第1个字段，以此类推"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		训练文件
+		<input id="trainData" type="text" style="width:620px;"/>
+		<input type="button" value="选择" onclick="select_train_file();"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		测试文件
+		<input id="testData" type="text" style="width:620px;" title="文件名 head:长度或比例 tail:长度或比例" />
+		<input type="button" value="选择" onclick="select_test_file();"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		备注
+		<textarea id="desc" style="width:620px;margin-left:36px;" rows="15"></textarea>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_add_app');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

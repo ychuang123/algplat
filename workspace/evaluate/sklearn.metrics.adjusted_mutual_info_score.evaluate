@@ -1,0 +1,1 @@
+{"evaluate":{"opTime":1564927626,"classifier":0,"regressor":0,"cluster":1,"greaterBetter":1,"pythonFun":"sklearn.metrics.adjusted_mutual_info_score","pythonFunImport":"","pythonFunDefine":"","desc":"AMI","useExample":""}}

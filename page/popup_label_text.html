@@ -1,0 +1,190 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function onClickFontChar(id) {
+	var select_entity = 0;
+	var num = callback('algplat_label_data_get_entity_num');
+	for (var i = 0; i < num; i++) {
+		if(document.getElementById('entity_' + i).checked) {
+			select_entity = i;
+			break;
+		}
+	}
+	var select_entity_color = callback('algplat_label_data_get_color', select_entity);
+	var font = document.getElementById(id);
+	if(font.color == select_entity_color) {
+		font.color = '#000000';
+	} else {
+		font.color = select_entity_color;
+	}
+}
+
+function commit_label(index) {
+	var text_fields = callback('algplat_data_get_label_fields', index).split(",");
+	var rowNum = callback('algplat_label_data_row_num');
+	for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+		var label = '';
+		for(var i = 0; i < text_fields.length; i++) {
+			var field = parseInt(text_fields[i]) - 1;
+			var charNum = callback('algplat_label_data_get_text_char_num', field, rowIndex);
+			for(var charIndex = 0; charIndex < charNum; charIndex++) {
+				var color = document.getElementById(rowIndex + '_' + field + '_' + charIndex).color;
+				var color_index = callback('algplat_label_data_get_color_index', color);
+				if(color_index >= 0) {
+					if(label != '') {
+						label = label + ',';
+					}
+					label = label + field + ':' + charIndex + ',' + color_index;
+				}
+			}
+		}
+		callback('algplat_label_data_set_text_label', label);
+	}
+}
+
+function commit(index, entity_index) {
+	commit_label(index);
+	
+	if(callback('algplat_label_data_next_page') == 1) {
+		show_data_row(index, entity_index);
+		return;
+	}
+	
+	callback('algplat_label_data_complete');
+	crawler_active_popup_runjs('popup_tool_label_data', 'refresh_list();');
+	alert('标注完成！');
+    crawler_popup_wnd_hide('popup_label_text');
+}
+
+function exit(index) {
+	if (crawl_prompt_yes_or_no('要提交当前页的标注结果吗？') != 0) {
+		commit_label(index);
+	}
+	
+	callback('algplat_label_data_complete');
+    crawler_popup_wnd_hide('popup_label_text');
+    crawler_active_popup_runjs('popup_tool_label_data', 'refresh_list();');
+}
+
+function show_data_row(data_index, entity_index) {
+	var table = document.getElementById('list');
+	var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+	var text_fields = callback('algplat_data_get_label_fields', data_index).split(",");
+	var rowNum = callback('algplat_label_data_row_num');
+	var start = callback('algplat_label_data_start');
+	for(var rowIndex = 0; rowIndex < rowNum; rowIndex++) {
+		for(var i = 0; i < text_fields.length; i++) {
+			var field = parseInt(text_fields[i]) - 1;
+			var row = table.insertRow(text_fields.length * rowIndex + field + 1);
+			var cell = row.insertCell(0);
+			cell.innerHTML = (start + rowIndex + 1) + '.' + (field + 1);
+			
+			cell = row.insertCell(1);
+			cell.innerHTML = callback('algplat_label_data_get_text_label', rowIndex, field);
+		}
+    }
+}
+
+function init_table(index, label_from_first, entity_index, num_per_page) {
+	callback('algplat_label_data_init', index, label_from_first, num_per_page);
+	show_data_row(index, entity_index);
+}
+
+function init_head(entity_index) {
+	var html = '';
+	var entities = callback('algplat_entity_get_entities', entity_index).split(",");
+	callback('algplat_label_data_set_entity_index', entity_index);
+	
+	for (var i = 0; i < entities.length; i++) {
+		var checked = '';
+		if(i == 0) {
+			checked = ' checked';
+		}
+		var font = '<font color="' + callback('algplat_label_data_get_color', i) + '">' + entities[i] + '</font>';
+		html = html + '<input type="radio" name="entity" id="entity_' + i + '"' + checked + '/>' + font + ' ';
+	}
+	document.getElementById("head").innerHTML = html;
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	var label_from_first = 0;
+	var num_per_page = 1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'label_from_first') {
+                label_from_first = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'num_per_page') {
+                num_per_page = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	var entity_index = callback('algplat_data_get_label_entity_index', index);
+	init_head(entity_index);
+	init_table(index, label_from_first, entity_index, num_per_page);
+    document.getElementById("id_next_page").setAttribute('onclick', 'commit(' + index + ',' + entity_index + ');');
+	document.getElementById("id_exit").setAttribute('onclick', 'exit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div id="head" style="margin-top:15px;">
+	</div>
+	
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="50">编号</td>
+				<td width="800">文本</td>
+			</tr>
+		</tbody></table>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="下一页" id="id_next_page" style="width:70px;"/>
+		<input type="button" value="退出" id="id_exit" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

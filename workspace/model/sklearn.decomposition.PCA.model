@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924309,"supervised":0,"preprocess":1,"featureSelect":0,"classifier":0,"regressor":0,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.decomposition.PCA","pythonClassImport":"","pythonClassDefine":"","desc":"主成分分析","inputParams":[],"studyParams":[],"useExample":""}}

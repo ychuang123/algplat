@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924260,"supervised":0,"preprocess":1,"featureSelect":0,"classifier":0,"regressor":0,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.decomposition.TruncatedSVD","pythonClassImport":"","pythonClassDefine":"","desc":"缩减版SVD。LSA/LSI（潜在语义分析）的sklearn实现","inputParams":[],"studyParams":[],"useExample":""}}

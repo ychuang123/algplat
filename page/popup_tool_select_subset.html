@@ -1,0 +1,131 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index) {
+
+	var out_file = document.getElementById("out_file").value;
+	if(out_file == '') {
+		alert('请指定输出文件！');
+		return;
+	}
+	if(out_file == callback('algplat_data_get_path', index)) {
+		alert('文件路径不能与数据集相同！');
+		return;
+	}
+	
+	var out_where = document.getElementById("where").value;
+	if(out_where == '') {
+		alert('请指定选择条件！');
+		return;
+	}
+	
+	var table = document.getElementById('fields');
+    var out_fields = '';
+    for (i = 0; i < table.rows.length; i++) {
+        if (document.getElementById('check_' + i).checked) {
+			if(out_fields != '') {
+				out_fields += ',';
+			}
+			out_fields += i;
+        }
+    }
+	if (out_fields == '') {
+		alert('请指定输出字段！');
+        return;
+    }
+	
+	var err = callback('algplat_data_select_output', index, out_file, out_where, out_fields);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	
+	alert('操作完成！');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = 0;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	callback('algplat_clear_python_program');
+	var fieldNum = callback('algplat_data_get_fieldNum', index);
+	var table = document.getElementById('fields');
+	for(var i = 0; i < fieldNum; i++) {
+        var row = table.insertRow(i);
+        var cell = row.insertCell(0);
+		cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1) + ' ' + callback('algplat_data_get_field_name', index, i);
+	}
+	
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+function selectFile() {
+    file_path = crawler_get_select_file(0, 'txt', '文本文件');
+    if (file_path != '') {
+        document.getElementById("out_file").value = file_path;
+    }
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+	<div>
+		输出文件
+		<br>
+		<input id="out_file" type="text" style="width:580px;"/>
+		<input type="button" value="选择" onclick="selectFile();"/>
+	</div>
+	<div style="margin-top:10px;">
+		选择条件
+		<br>
+		<input id="where" type="text" title="r[0]=='*' and r[1]=='*'" style="width:580px;"/>
+	</div>
+    <div style="margin-top:10px;">
+		输出字段
+		<br>
+		<table id="fields" width="580px" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+		</tbody></table>
+	</div>
+	<div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok" />
+		<input type="button" value="查看程序" onclick="crawler_popup_wnd_show(-1, 'python程序', 'popup_view_program.html', 1000, 800);" style="width:90px;margin-left:5px;" />
+		<input type="button" value="查看日志" onclick="crawler_popup_wnd_show(-1, '运行日志', 'popup_view_embed_python_stdout.html', 1200, 700);" style="width:90px;margin-left:5px;" />
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_tool_select_subset');" style="margin-left:5px;" />
+	</div>
+</body>
+</html>

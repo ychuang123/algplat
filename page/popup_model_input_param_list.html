@@ -1,0 +1,194 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function onAddParam(modelIndex) {
+	crawler_popup_wnd_show(-1, '增加超参', 'popup_model_input_param_edit.html?modelIndex=' + modelIndex, 810, 320);
+}
+
+function onModParam(modelIndex) {
+	var table = document.getElementById('list');
+	var modelName = callback('algplat_model_get_class', modelIndex);
+	var count = callback('algplat_model_get_param_count', modelName, 1);
+	var selected = new Array();
+    var select_num = 0;
+    for (i = 0; i < count; i++) {
+        if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+        alert('请选择参数！');
+        return;
+    }
+	if (select_num > 1) {
+        alert('请选择1个参数！');
+        return;
+    }
+	
+	crawler_popup_wnd_show(-1, '修改超参', 'popup_model_input_param_edit.html?modelIndex=' + modelIndex + '&paramIndex=' + selected[0], 810, 320);
+}
+
+function onDelParam(modelIndex) {
+	var table = document.getElementById('list');
+	var modelName = callback('algplat_model_get_class', modelIndex);
+	var count = callback('algplat_model_get_param_count', modelName, 1);
+	var selected = new Array();
+    var select_num = 0;
+    for (i = 0; i < count; i++) {
+        if (document.getElementById('check_' + i).checked) {
+            selected[select_num] = i;
+            select_num += 1;
+        }
+    }
+	
+	if (select_num == 0) {
+        alert('请选择参数！');
+        return;
+    }
+	if (crawl_prompt_yes_or_no('确定要删除选择的参数？') == 0) {
+		return;
+	}
+	for (i = count - 1; i >= 0; i--) {
+		callback('algplat_del_model_param', modelIndex, 1, selected[i]);
+	}
+	refresh(modelIndex);
+}
+
+function select_all() {
+	var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 0; i < len - 1; i++) {
+        document.getElementById('check_' + i).checked = true;
+    }
+}
+
+function unselect() {
+	var table = document.getElementById('list');
+    var len = table.rows.length;
+    for (var i = 0; i < len - 1; i++) {
+        document.getElementById('check_' + i).checked = false;
+    }
+}
+
+function refresh(modelIndex) {
+
+	var table = document.getElementById('list');
+	var len = table.rows.length;
+    for (var i = 1; i < len; i++) {
+        table.deleteRow(1);
+    }
+	
+	var modelName = callback('algplat_model_get_class', modelIndex);
+    var count = callback('algplat_model_get_param_count', modelName, 1);
+    for (i = 0; i < count; i++) {
+        
+        var row = table.insertRow(i + 1);
+        //row.setAttribute('bgcolor', '#CCCCCC');
+
+        var cell = row.insertCell(0);
+        cell.innerHTML = '<input id="check_' + i + '" type="checkbox"/>' + (i+1);
+
+        cell = row.insertCell(1);
+        cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, i, 'name');
+
+        cell = row.insertCell(2);
+		if(callback('algplat_model_get_param_value', modelName, 1, i, 'option') == 1) {
+			cell.innerHTML = '可选';
+		} else {
+			cell.innerHTML = '必须';
+		}
+
+        cell = row.insertCell(3);
+        cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, i, 'valueSet');
+		
+        cell = row.insertCell(4);
+        cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, i, 'defaultValue');
+		
+        cell = row.insertCell(5);
+        cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, i, 'candidateValues');
+
+        cell = row.insertCell(6);
+        cell.innerHTML = callback('algplat_model_get_param_value', modelName, 1, i, 'desc');
+    }
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = 0;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+			if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	refresh(index);
+	
+    document.getElementById("id_add").setAttribute('onclick', 'onAddParam(' + index + ');');
+    document.getElementById("id_mod").setAttribute('onclick', 'onModParam(' + index + ');');
+    document.getElementById("id_del").setAttribute('onclick', 'onDelParam(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		<input type="button" value="增加" id="id_add"/>
+		<input type="button" value="修改" id="id_mod" style="margin-left:5px;"/>
+		<input type="button" value="删除" id="id_del" style="margin-left:5px;"/>
+		
+		<input type="button" value="选择全部" onclick="select_all();" style="margin-left:10px;width:90px;"/>
+		<input type="button" value="取消选择" onclick="unselect();" style="width:90px;"/>
+		
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_model_input_param_list');" style="margin-left:10px;"/>
+		
+	</div>
+	
+	<div style="margin-top:10px;">
+		<table id="list" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+				<td width="50">序号</td>
+				<td width="100">名称</td>
+				<td width="50">可选</td>
+				<td width="200">值集</td>
+				<td width="100">默认值</td>
+				<td width="150">推荐集</td>
+				<td width="500">描述</td>
+			</tr>
+		</tbody></table>
+	</div>
+	
+</body>
+</html>

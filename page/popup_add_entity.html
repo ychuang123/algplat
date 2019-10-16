@@ -1,0 +1,106 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(index) {
+
+	var name = document.getElementById('name').value;
+	if(name == '') {
+		alert('请输入名称！');
+		return;
+	}
+	
+	var entities = document.getElementById('entities').value;
+	if(entities == '') {
+		alert('请输入实体集合！');
+		return;
+	}
+	
+	var desc = document.getElementById('desc').value;
+	
+    var msg = callback('algplat_set_entity', index, name, entities, desc);
+	if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+    crawler_popup_wnd_hide('popup_add_entity');
+    crawler_active_ui_runjs(2, "refresh();");
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var index = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'index') {
+                index = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	if(index >= 0) {
+		document.getElementById("name").value = callback('algplat_entity_get_name', index);
+        document.getElementById("entities").value = callback('algplat_entity_get_entities', index);
+		document.getElementById("desc").value = callback('algplat_entity_get_desc', index);
+		
+		document.getElementById("name").setAttribute('disabled', 'disabled');
+	}
+	
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + index + ');');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		名称
+		<input id="name" type="text" style="margin-left:36px;width:620px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		实体集合
+		<input id="entities" type="text" title="逗号分隔" style="width:620px;"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		备注
+		<textarea id="desc" style="margin-left:36px;width:620px;" rows="15"></textarea>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_add_entity');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

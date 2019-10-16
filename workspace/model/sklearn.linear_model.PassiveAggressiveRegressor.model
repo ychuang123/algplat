@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924126,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.PassiveAggressiveRegressor","pythonClassImport":"","pythonClassDefine":"","desc":"被动攻击 与感知机类似","inputParams":[],"studyParams":[],"useExample":""}}

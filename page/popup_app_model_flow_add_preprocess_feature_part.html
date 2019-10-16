@@ -1,0 +1,134 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function loadPreProcessModel(node) {
+	var belong_y = callback('algplat_app_model_flow_node_belong_y', node);
+	if(belong_y == 1) {
+		callback('algplat_model_refresh_list', 'model_list_preprocess', 0);
+	} else {
+		callback('algplat_model_refresh_list', 'model_list_preprocess');
+	}
+
+	var ops = document.getElementById('model_select').options;
+	ops.length = 0;
+	
+	var count = callback('algplat_model_refresh_list_count');
+    for (i = 0; i < count; i++) {
+		var index = callback('algplat_model_refresh_list_index', i);
+        var name = callback('algplat_model_get_class', index);
+		ops.add(new Option(name, name));
+	}
+}
+
+function commit(node, caller) {
+	var pipeline = 0;
+	if(document.getElementById('type_pipeline_yes').checked) {
+		pipeline = 1;
+	}
+	
+	var remainderDrop = 0;
+	if(document.getElementById('remainder_drop').checked) {
+		remainderDrop = 1;
+	}
+	
+	var fields = document.getElementById('fields').value;
+	if(fields == '') {
+		alert('请输入字段！');
+		return;
+	}
+	
+	var model = document.getElementById('model_select').value;
+	if(model == '') {
+		alert('请选择预处理模型！');
+        return;
+	}
+	
+	var modelParam = '';
+	var err = callback('algplat_app_model_flow_add_preprocess', node, pipeline, remainderDrop, fields, model, modelParam);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	crawler_active_popup_runjs(caller, 'update_ui();');
+	crawler_popup_wnd_hide('popup_app_model_flow_add_preprocess_feature_part');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var node = -1;
+	var caller = '';
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'node') {
+                node = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'caller') {
+                caller = namevalue[1];
+            }
+        }
+    }
+	
+	loadPreProcessModel(node);
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + node + ',"' + caller + '");');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:20px;margin-top:10px;">
+	<div>
+		串行
+		<input type="radio" name="type" id="type_pipeline_yes" style="margin-right:40px;" checked/>
+		并行
+		<input type="radio" name="type" id="type_pipeline_no"/>
+	</div>
+	<div style="margin-top:10px;" id="div_fields">
+		字段
+		<input id="fields" type="text" style="width:200px;" title="从1开始的特征编号，逗号分隔，连续特征使用冒号分隔。空表示处理所有特征。~开头表示取反" />
+	</div>
+	<div style="margin-top:10px;" id="div_fields">
+		剩余
+		<input type="radio" name="remainder" id="remainder_passthrough" checked/>保留
+		<input type="radio" name="remainder" id="remainder_drop" style="margin-left:40px;"/>丢弃
+	</div>
+	<div style="margin-top:10px;">
+		模型
+		<span>
+			<select id="model_select" style="width:200px;" >
+			</select>
+		</span>
+	</div>
+	<div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_model_flow_add_preprocess_feature_part');" style="margin-left:5px;"/>
+	</div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924161,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.linear_model.SGDRegressor","pythonClassImport":"","pythonClassDefine":"","desc":"支持不同损失目标的随机梯度下降","inputParams":[],"studyParams":[],"useExample":""}}

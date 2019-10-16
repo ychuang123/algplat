@@ -1,0 +1,84 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function load() {
+    var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var conf_index = 0;
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'conf_index') {
+                conf_index = parseInt(namevalue[1]);
+            }
+        }
+    }
+    
+    document.getElementById('name').innerHTML = callback('crawler_conf_list_get_chname', conf_index);
+	document.getElementById('value').value = callback('crawler_conf_list_get_set', conf_index);
+    document.getElementById("id_ok").setAttribute('onclick', 'commit(' + conf_index + ');');
+}
+
+function commit(conf_index) {
+
+	var value = document.getElementById('value').value;
+	if(value == callback('crawler_conf_list_get_set', conf_index)) {
+		alert('请设置不同的值！');
+		return;
+	}
+	
+    var msg = callback('crawler_conf_list_set_value', conf_index, value);
+	if(msg != '') {
+		alert(msg);
+		return;
+	}
+	
+    crawler_popup_wnd_hide('popup_conf_set');
+    crawler_active_ui_runjs(2, "refresh();");
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+    <div>
+		<span id="name"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<input id="value" type="text" style="width:500px;"/>
+	</div>
+	
+    <div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_conf_set');" style="margin-left:20px;"/>
+	</div>
+
+</body>
+</html>

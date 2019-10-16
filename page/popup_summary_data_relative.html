@@ -1,0 +1,150 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function asyn_relative(data, x_field, y_field) {
+	
+	var y_field_array = y_field.split(",");
+
+	var type = callback('algplat_app_train_data_get_field_type', data, x_field);
+	if(type == '数值') { // 检查其他特征是否为类型特征
+		for(var i = 0; i < y_field_array.length; i++) {
+			type = callback('algplat_app_train_data_get_field_type', data, parseInt(y_field_array[i]));
+			if(type != '数值') {
+				break;
+			}
+		}
+	}
+	
+	var names = '';
+	if(type == '数值') {
+		names = 'Pearson皮尔森相关系数,MIC最大信息系数,DC距离相关系数,卡方检验';
+	} else {
+		names = '卡方检验,信息增益-互信息';
+	}
+	
+	var relatives = callback('algplat_app_train_data_relative', data, x_field, y_field, names);
+	if(relatives == '') {
+		document.getElementById('div_msg').innerHTML = "运行失败！";
+		document.getElementById('div_tool').style.display = '';
+		return;
+	}
+	
+	var name_array = names.split(",");
+	var relative_array = relatives.split(",");
+	
+	var table = document.getElementById('relative');
+	
+	// 初始化表头
+	var row = table.rows[0];
+    var cell = row.insertCell(0);
+	cell.innerHTML = "序号";
+	cell.setAttribute('width', 100);
+	
+	cell = row.insertCell(1);
+	cell.innerHTML = "特征1";
+	cell.setAttribute('width', 100);
+	
+	cell = row.insertCell(2);
+	cell.innerHTML = "特征2";
+	cell.setAttribute('width', 100);
+	
+	for(var i = 0; i < name_array.length; i++) {
+		cell = row.insertCell(3 + i);
+		cell.innerHTML = name_array[i];
+		cell.setAttribute('width', 200);
+	}
+	
+	// 初始化表体
+	for(var rowNo = 0; rowNo < y_field_array.length; rowNo++) {
+		
+		var row = table.insertRow(rowNo + 1);
+		//row.setAttribute('bgcolor', '#CCCCCC');
+		
+		var cell = row.insertCell(0);
+		cell.innerHTML = (rowNo+1);
+
+		cell = row.insertCell(1);
+		cell.innerHTML = x_field + 1;
+		
+		cell = row.insertCell(2);
+		cell.innerHTML = parseInt(y_field_array[rowNo]) + 1;
+		
+		for(var i = 0; i < name_array.length; i++) {
+			cell = row.insertCell(3 + i);
+			cell.innerHTML = relative_array[rowNo * name_array.length + i];
+		}
+    }
+	
+	document.getElementById('div_msg').style.display = 'none';
+	document.getElementById('div_tool').style.display = '';
+	document.getElementById('div_table').style.display = '';
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var data = 0;
+	var x_field = 0;
+	var y_field = '';
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'data') {
+                data = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'x_field') {
+                x_field = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'y_field') {
+                y_field = namevalue[1];
+            }
+        }
+    }
+	
+	setTimeout(function () { asyn_relative(data, x_field, y_field); }, 1000);
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+	<div id="div_tool" style="display:none;">
+		<input type="button" value="日志" title="查看运行日志" onclick="crawler_popup_wnd_show(-1, '运行日志', 'popup_view_embed_python_stdout.html', 1200, 700);" />
+		<input type="button" value="关闭" onclick="crawler_popup_wnd_hide('popup_summary_data_relative');" />
+	</div>
+	<div style="margin-top:10px;" id="div_msg">
+		运行中，请等候 ......
+	</div>
+	<div id="div_table" style="margin-top:10px;display:none;">
+		<table id="relative" width="100%" cellpadding="5" border="1" style="border-collapse: collapse;" bordercolor="#000000"><tbody>
+			<tr style="background-color:#cccccc">
+			</tr>
+		</tbody></table>
+	</div>
+</body>
+</html>

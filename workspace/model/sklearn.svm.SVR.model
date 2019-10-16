@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924266,"supervised":1,"preprocess":0,"featureSelect":0,"classifier":0,"regressor":1,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.svm.SVR","pythonClassImport":"","pythonClassDefine":"","desc":"","inputParams":[],"studyParams":[],"useExample":""}}

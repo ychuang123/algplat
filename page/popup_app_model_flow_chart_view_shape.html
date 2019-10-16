@@ -1,0 +1,183 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+
+/* 向上箭头 */
+.to_top {
+	width: 0;
+	height: 0;
+	border-bottom: 30px solid #f0f;
+	border-left: 30px solid transparent;
+	border-right: 30px solid transparent;
+}
+
+/* 向左箭头 */
+.to_left {
+	width: 0;
+	height: 0;
+	border-right: 30px solid #ffd900;
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+}
+
+/* 向右箭头 */
+.to_right {
+	width: 0;
+	height: 0;
+	border-left: 30px solid greenyellow;
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+}
+
+/* 向下箭头 */
+.to_bottom {
+	width: 0;
+	height: 0;
+	border-top: 30px solid skyblue;
+	border-left: 30px solid transparent;
+	border-right: 30px solid transparent;
+}
+
+</style>
+<script type="text/javascript">
+
+function update_shape(shapes) {
+	var lines = shapes.split("\n");
+	for(var i = 0; i < lines.length; i++) {
+		var line = lines[i];
+		var pos = line.indexOf(':');
+		if(pos <= 0) {
+			continue;
+		}
+		var node_id = line.substring(0, pos);
+		var tensor_shape = line.substring(pos + 1);
+		if(document.getElementById('input_' + node_id).value == '') {
+			document.getElementById('input_' + node_id).value = tensor_shape;
+		} else {
+			document.getElementById('input_' + node_id).value = document.getElementById('input_' + node_id).value + '\n' + tensor_shape;
+		}
+	}
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var appIndex = -1;
+	var modelFlowIndex = -1;
+	var paramComboIndex = -1;
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'appIndex') {
+                appIndex = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'modelFlowIndex') {
+                modelFlowIndex = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'paramComboIndex') {
+                paramComboIndex = parseInt(namevalue[1]);
+            }
+        }
+    }
+	
+	callback('algplat_app_model_flow_super_param_init_view_shape', appIndex, modelFlowIndex);
+	
+	var type = callback('algplat_app_get_type', appIndex);
+	if(type < 3) {
+		document.getElementById('char_table_2').style.display = 'none';
+		document.getElementById('div_input_root_1').innerHTML = '初始特征';
+		document.getElementById('div_target_root_1').innerHTML = '初始目标<br>' + callback('algplat_app_get_outputField', appIndex);
+		document.getElementById('x_node_1').innerHTML = callback('algplat_app_model_flow_x_html', appIndex, modelFlowIndex);
+		document.getElementById('y_node_1').innerHTML = callback('algplat_app_model_flow_y_html', appIndex, modelFlowIndex);
+	} else {
+		document.getElementById('char_table_1').style.display = 'none';
+		document.getElementById('div_input_root_2').innerHTML = '初始特征';
+		document.getElementById('x_node_2').innerHTML = callback('algplat_app_model_flow_x_html', appIndex, modelFlowIndex);
+	}
+	
+	var shapes = callback('algplat_app_predict_tensor_shape_program', appIndex, modelFlowIndex, paramComboIndex);
+	update_shape(shapes);
+}
+
+function view_program() {
+	crawler_popup_wnd_show(-1, 'python程序', 'popup_view_predict_tensor_shape_program.html', 1000, 800);
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div style="margin-top:15px;">
+		<input type="button" value="查看程序" title="查看python程序" onclick="view_program();" style="margin-left:5px;width:90px;"/>
+		<input type="button" value="关闭" onclick="crawler_popup_wnd_hide('popup_app_model_flow_chart_view_shape');" style="margin-left:1px;"/>
+	</div>
+	
+    <div style="border:1px solid #000;margin-top:10px;width:100%;height:890px;overflow:scroll;">
+		<table id="char_table_1" width="100%" >
+			<tbody>
+				<tr>
+					<td width="70%" align="center">
+						<div id="div_input_root_1" style="display:block;border:1px solid #000;width:250px;head:100px;background-color: #C2B4D6;">
+						</div>
+					</td>
+					<td width="30%" align="center">
+						<div id="div_target_root_1" style="display:block;border:1px solid #000;width:250px;head:100px;background-color: #C2B4D6;">
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td align="center" valign="top">
+						<table><tbody id="x_node_1">
+						</tbody></table>
+					</td>
+					<td align="center" valign="top">
+						<table><tbody id="y_node_1">
+						</tbody></table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table id="char_table_2" width="100%" >
+			<tbody>
+				<tr>
+					<td align="center">
+						<div id="div_input_root_2" style="display:block;border:1px solid #000;width:250px;head:100px;background-color: #C2B4D6;">
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td align="center" valign="top">
+						<table><tbody id="x_node_2">
+						</tbody></table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+</body>
+</html>

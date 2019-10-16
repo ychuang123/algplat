@@ -1,0 +1,55 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function load() {
+	
+	callback('algplat_seek_init_embed_python_stdout_read');
+	while(true) {
+		var stdout = callback('algplat_get_embed_python_stdout');
+		if(typeof stdout != "string") {
+			break;
+		}
+		
+		var python_output = document.getElementById('python_output');
+		var text = python_output.value;
+		if (text.length > 10000) {
+			text = '';
+		}
+		text += stdout;
+		python_output.value = text;
+	}
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:10px;margin-top:10px;">
+
+	<div>
+		<input type="button" value="退出" onclick="crawler_popup_wnd_hide('popup_view_embed_python_stdout');"/>
+	</div>
+	
+	<div style="margin-top:10px;">
+		<textarea id="python_output" style="width:100%;" rows="36"></textarea>
+	</div>
+	
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"plugin":{"opTime":1564971374,"pythonName":"jieba_tokenizer","type":"python函数","pythonImport":"import jieba","pythonDefine":"def jieba_tokenizer(s):\n    ret = []\n    for i in s:\n        for t in jieba.cut(i):\n            ret.append(t)\n    return ret","desc":"结巴切词函数，供 CountVectorizer 等使用"}}

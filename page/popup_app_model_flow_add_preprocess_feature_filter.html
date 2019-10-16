@@ -1,0 +1,93 @@
+﻿<html>
+<head>
+<style type="text/css">
+input[type="submit"],input[type="button"]
+{
+	font-family: "宋体";
+	font-size: 18px;
+	color: white;
+	background-color: #87A3C9;
+	height: 26px;
+	width: 50px;
+	border: 1px;
+}
+td,div
+{
+    FONT-FAMILY:"宋体";
+    font-size: 18px;
+}
+</style>
+<script type="text/javascript">
+
+function commit(node, caller) {
+	var pipeline = 0;
+	if(document.getElementById('type_pipeline_yes').checked) {
+		pipeline = 1;
+	}
+	
+	var fields = document.getElementById('fields').value;
+	if(fields == '') {
+		alert('请输入字段！');
+		return;
+	}
+	
+	var remainderDrop = 1;
+	var model = "'passthrough'";
+	var modelParam = '';
+	var err = callback('algplat_app_model_flow_add_preprocess', node, pipeline, remainderDrop, fields, model, modelParam);
+	if(err != '') {
+		alert(err);
+		return;
+	}
+	crawler_active_popup_runjs(caller, 'update_ui();');
+	crawler_popup_wnd_hide('popup_app_model_flow_add_preprocess_feature_filter');
+}
+
+function load() {
+	var url = window.location.href;
+    var pos = url.indexOf('?');
+    var baseurl = url;
+    var node = -1;
+	var caller = '';
+	
+    if (pos > 0) {
+        baseurl = url.substring(0, pos);
+        var query = url.substring(pos + 1);
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+            var namevalue = params[i].split("=");
+            if (namevalue.length != 2) {
+                continue;
+            }
+            if (namevalue[0] == 'node') {
+                node = parseInt(namevalue[1]);
+            }
+			if (namevalue[0] == 'caller') {
+                caller = namevalue[1];
+            }
+        }
+    }
+	
+	document.getElementById("id_ok").setAttribute('onclick', 'commit(' + node + ',"' + caller + '");');
+}
+
+</script>
+</head>
+
+<body onLoad="load();" style="margin-left:20px;margin-top:10px;">
+	<div>
+		串行
+		<input type="radio" name="type" id="type_pipeline_yes" style="margin-right:40px;" checked/>
+		并行
+		<input type="radio" name="type" id="type_pipeline_no"/>
+	</div>
+	<div style="margin-top:10px;" id="div_fields">
+		字段
+		<input id="fields" type="text" style="width:200px;" title="从1开始的特征编号，逗号分隔，连续特征使用冒号分隔。空表示处理所有特征。~开头表示取反" />
+	</div>
+	<div style="margin-top:10px;">
+		<input type="button" value="确定" id="id_ok"/>
+		<input type="button" value="取消" onclick="crawler_popup_wnd_hide('popup_app_model_flow_add_preprocess_feature_filter');" style="margin-left:5px;"/>
+	</div>
+</body>
+</html>

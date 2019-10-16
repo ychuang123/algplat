@@ -1,0 +1,1 @@
+{"model":{"opTime":1564924255,"supervised":0,"preprocess":1,"featureSelect":0,"classifier":0,"regressor":0,"cluster":0,"timeSeries":0,"pythonClass":"sklearn.preprocessing.PolynomialFeatures","pythonClassImport":"","pythonClassDefine":"","desc":"生成多项式特征","inputParams":[],"studyParams":[],"useExample":""}}
